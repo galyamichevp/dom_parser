@@ -16,7 +16,7 @@ tbd
 tbd
 
 ## components design
-![deployment diagram](https://github.com/galyamichevp/go-dom-parser/architecture/master/components.png?raw=true)
+![deployment diagram](https://github.com/galyamichevp/go-dom-parser/blob/master/architecture/components.png?raw=true)
 
 ## deployment doagram
-![deployment diagram](https://github.com/galyamichevp/go-dom-parser/architecture/master/deployment.png?raw=true)
+![deployment diagram](https://github.com/galyamichevp/go-dom-parser/blob/master/architecture/deployment.png?raw=true)
