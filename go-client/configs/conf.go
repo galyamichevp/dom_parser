@@ -7,10 +7,14 @@ import (
 	"os"
 )
 
+//Configuration - application configuration
 type Configuration struct {
-	Db DBConfig
+	Db   DBConfig
+	RMQ  RMQConfig
+	Host HostConfig
 }
 
+//SetupConf - load configuration
 func SetupConf() *Configuration {
 	c := flag.String("c", "app.conf", "Specify the configuration file.")
 	flag.Parse()

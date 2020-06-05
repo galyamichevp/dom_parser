@@ -6,6 +6,7 @@ import (
 	"go-dom-parser/api/sockets"
 	"go-dom-parser/configs"
 	"go-dom-parser/domain"
+	"strconv"
 
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
@@ -45,5 +46,5 @@ func main() {
 	router := routes.SetupRouter()
 
 	// run server
-	router.Run()
+	router.Run(":" + strconv.Itoa(cfg.Host.Port))
 }

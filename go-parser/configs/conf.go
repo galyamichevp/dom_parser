@@ -9,8 +9,9 @@ import (
 
 //Configuration - application configuration
 type Configuration struct {
-	Db  DBConfig
-	RMQ RMQConfig
+	Db   DBConfig
+	RMQ  RMQConfig
+	Host HostConfig
 }
 
 //SetupConf - load configuration

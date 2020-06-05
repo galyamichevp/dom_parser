@@ -5,6 +5,8 @@ https://semaphoreci.com/community/tutorials/building-go-web-applications-and-mic
 
 https://medium.com/@_ektagarg/golang-a-todo-app-using-gin-980ebb7853c8
 
+https://dev.to/olushola_k/working-with-rabbitmq-in-golang-1kmj
+
 # Goals
 
 # Architecture
