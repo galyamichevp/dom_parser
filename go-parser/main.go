@@ -38,7 +38,9 @@ func main() {
 
 	// === RMQ configuration ===
 
-	sockets.SetupRMQ(cfg)
+	ch := sockets.SetupRMQ(cfg)
+
+	ch.Subscribe(cfg)
 
 	// === RMQ configuration ===
 
