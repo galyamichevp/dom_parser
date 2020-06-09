@@ -5,13 +5,15 @@ import (
 	"go-dom-parser/configs"
 	"log"
 	"os"
+	"time"
 
 	"github.com/streadway/amqp"
 )
 
 // Conn -
 type Conn struct {
-	Channel *amqp.Channel
+	Channel    *amqp.Channel
+	Processors map[string][]chan string
 }
 
 //SetupRMQ - setup RMQ instance
@@ -24,37 +26,14 @@ func SetupRMQ(cfg *configs.Configuration) *Conn {
 	amqpChannel, err := conn.Channel()
 	handleError(err, "Can't create a amqpChannel")
 
-	amqpChannel.ExchangeDeclare(
-		cfg.RMQ.ExchangeIn,     // name of the exchange
-		cfg.RMQ.ExchangeTypeIn, // type
-		false,                  // durable
-		false,                  // delete when complete
-		false,                  // internal
-		false,                  // noWait
-		nil,                    // arguments
-	)
-
-	// create the queue if it doesn't already exist
-	_, err = amqpChannel.QueueDeclare(cfg.RMQ.QueueIn, true, false, false, false, nil)
-	handleError(err, "Could not declare `cfg.RMQ.Queue` queue")
-
-	// err = amqpChannel.QueueBind(cfg.RMQ.Queue, "#", cfg.RMQ.Exchange, false, nil)
-	err = amqpChannel.QueueBind(
-		cfg.RMQ.QueueIn,      // name of the queue
-		cfg.RMQ.RoutingKeyIn, // bindingKey
-		cfg.RMQ.ExchangeIn,   // sourceExchange
-		false,                // noWait
-		nil,                  // arguments
-	)
-	handleError(err, "Could not bind to `cfg.RMQ.Queue` queue")
-
-	// prefetch 4x as many messages as we can handle at once
-	prefetchCount := cfg.RMQ.Concurrency * 4
-	err = amqpChannel.Qos(prefetchCount, 0, false)
-	handleError(err, "Could not configure QoS")
+	// income queue with web pages
+	buildChannel(amqpChannel, cfg.RMQ.ExchangeIn, cfg.RMQ.ExchangeTypeIn, cfg.RMQ.QueueIn, cfg.RMQ.RoutingKeyIn, cfg.RMQ.Concurrency)
+	// outcome queue to send parse result
+	buildChannel(amqpChannel, cfg.RMQ.ExchangeOut, cfg.RMQ.ExchangeTypeOut, cfg.RMQ.QueueOut, cfg.RMQ.RoutingKeyOut, cfg.RMQ.Concurrency)
 
 	return &Conn{
-		Channel: amqpChannel,
+		Channel:    amqpChannel,
+		Processors: make(map[string][]chan string),
 	}
 }
 
@@ -102,7 +81,7 @@ func (conn *Conn) Subscribe(cfg *configs.Configuration) error {
 		fmt.Printf("Processing messages on thread %v...\n", i)
 		go func() {
 			for msg := range messageChannel {
-				if handler(msg) {
+				if conn.handler(msg) {
 					msg.Ack(false)
 				} else {
 					msg.Nack(false, true)
@@ -116,13 +95,93 @@ func (conn *Conn) Subscribe(cfg *configs.Configuration) error {
 	return nil
 }
 
-func handler(msg amqp.Delivery) bool {
+// AddProcessor adds an event listener
+func (conn *Conn) AddProcessor(e string, ch chan string) {
+	if conn.Processors == nil {
+		conn.Processors = make(map[string][]chan string)
+	}
+	if _, ok := conn.Processors[e]; ok {
+		conn.Processors[e] = append(conn.Processors[e], ch)
+	} else {
+		conn.Processors[e] = []chan string{ch}
+	}
+}
+
+// RemoveProcessor removes an event listener
+func (conn *Conn) RemoveProcessor(e string, ch chan string) {
+	if _, ok := conn.Processors[e]; ok {
+		for i := range conn.Processors[e] {
+			if conn.Processors[e][i] == ch {
+				conn.Processors[e] = append(conn.Processors[e][:i], conn.Processors[e][i+1:]...)
+				break
+			}
+		}
+	}
+}
+
+func buildChannel(amqpChannel *amqp.Channel, exchange, exchangeType, queue, routingKey string, concurrency int) {
+	amqpChannel.ExchangeDeclare(
+		exchange,     // name of the exchange
+		exchangeType, // type
+		false,        // durable
+		false,        // delete when complete
+		false,        // internal
+		false,        // noWait
+		nil,          // arguments
+	)
+
+	// create the queue if it doesn't already exist
+	_, err := amqpChannel.QueueDeclare(queue, true, false, false, false, nil)
+	handleError(err, "Could not declare `cfg.RMQ.Queue` queue")
+
+	// err = amqpChannel.QueueBind(cfg.RMQ.Queue, "#", cfg.RMQ.Exchange, false, nil)
+	err = amqpChannel.QueueBind(
+		queue,      // name of the queue
+		routingKey, // bindingKey
+		exchange,   // sourceExchange
+		false,      // noWait
+		nil,        // arguments
+	)
+	handleError(err, "Could not bind to `cfg.RMQ.Queue` queue")
+
+	// prefetch 4x as many messages as we can handle at once
+	prefetchCount := concurrency * 4
+	err = amqpChannel.Qos(prefetchCount, 0, false)
+	handleError(err, "Could not configure QoS")
+}
+
+//handler handle queue message
+func (conn *Conn) handler(msg amqp.Delivery) bool {
 	if msg.Body == nil {
 		fmt.Println("Error, no message body!")
 		return false
 	}
-	fmt.Println(string(msg.Body))
+	fmt.Println("income message: " + string(msg.Body))
+
+	conn.emit("test", string(msg.Body))
+
 	return true
+}
+
+// Emit emits an event on the Dog struct instance
+func (conn *Conn) emit(e string, response string) {
+	if _, ok := conn.Processors[e]; ok {
+		for _, handler := range conn.Processors[e] {
+			go func(handler chan string) {
+				handler <- response
+				for {
+					select {
+					case x := <-handler:
+						fmt.Println("processed res: " + x)
+						return
+					case <-time.After(10 * time.Second):
+						fmt.Println("FAIL res: ")
+						return
+					}
+				}
+			}(handler)
+		}
+	}
 }
 
 func handleError(err error, msg string) {

@@ -5,6 +5,7 @@ import (
 	"go-dom-parser/api/routes"
 	"go-dom-parser/api/sockets"
 	"go-dom-parser/configs"
+	"go-dom-parser/core"
 	"go-dom-parser/domain"
 	"strconv"
 
@@ -36,9 +37,18 @@ func main() {
 	configs.DB.AutoMigrate(&domain.Resource{})
 	// === DB configuration ===
 
+	// === Processor ===
+
+	p := core.New()
+	p.Run()
+
+	// === Processor ===
+
 	// === RMQ configuration ===
 
 	ch := sockets.SetupRMQ(cfg)
+
+	ch.AddProcessor("test", p.ProcessorChan)
 
 	ch.Subscribe(cfg)
 
