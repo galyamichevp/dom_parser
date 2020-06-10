@@ -5,7 +5,6 @@ import (
 	"go-dom-parser/configs"
 	"log"
 	"os"
-	"time"
 
 	"github.com/streadway/amqp"
 )
@@ -30,7 +29,7 @@ func SetupRMQ(cfg *configs.Configuration) *Conn {
 	// income queue with web pages
 	buildChannel(amqpChannel, cfg.RMQ.ExchangeIn, cfg.RMQ.ExchangeTypeIn, cfg.RMQ.QueueIn, cfg.RMQ.RoutingKeyIn, cfg.RMQ.Concurrency)
 	// outcome queue to send parse result
-	buildChannel(amqpChannel, cfg.RMQ.ExchangeOut, cfg.RMQ.ExchangeTypeOut, cfg.RMQ.QueueOut, cfg.RMQ.RoutingKeyOut, cfg.RMQ.Concurrency)
+	//(amqpChannel, cfg.RMQ.ExchangeOut, cfg.RMQ.ExchangeTypeOut, cfg.RMQ.QueueOut, cfg.RMQ.RoutingKeyOut, cfg.RMQ.Concurrency)
 
 	return &Conn{
 		Channel:    amqpChannel,
@@ -41,7 +40,8 @@ func SetupRMQ(cfg *configs.Configuration) *Conn {
 
 // Publish - publish message to RMQ
 func (conn *Conn) Publish(cfg *configs.Configuration, body []byte) error {
-	log.Printf("send message to exchange")
+	//log.Printf("send message to exchange")
+	fmt.Println("Sent request to: " + cfg.RMQ.ExchangeOut)
 
 	message := amqp.Publishing{
 		//DeliveryMode: amqp.Persistent,
@@ -56,6 +56,8 @@ func (conn *Conn) Publish(cfg *configs.Configuration, body []byte) error {
 		Priority:        0, // 0-9
 	}
 
+	//time.Sleep(30 * time.Second)
+	//return nil
 	return conn.Channel.Publish(
 		cfg.RMQ.ExchangeOut,   // publish to an exchange
 		cfg.RMQ.RoutingKeyOut, // routing to 0 or more queues
@@ -107,6 +109,8 @@ func (conn *Conn) AddProcessor(e string, ch chan string) {
 	} else {
 		conn.Processors[e] = []chan string{ch}
 	}
+
+	conn.observe("out")
 }
 
 // RemoveProcessor removes an event listener
@@ -158,7 +162,7 @@ func (conn *Conn) handler(msg amqp.Delivery) bool {
 		fmt.Println("Error, no message body!")
 		return false
 	}
-	fmt.Println("income message: " + string(msg.Body))
+	//fmt.Println("income message: " + string(msg.Body))
 
 	conn.emit("test", string(msg.Body))
 
@@ -171,16 +175,26 @@ func (conn *Conn) emit(e string, response string) {
 		for _, handler := range conn.Processors[e] {
 			go func(handler chan string) {
 				handler <- response
+			}(handler)
+		}
+	}
+}
+
+func (conn *Conn) observe(e string) {
+	if _, ok := conn.Processors[e]; ok {
+		for _, handler := range conn.Processors[e] {
+			go func(handler chan string) {
 				for {
 					select {
 					case x := <-handler:
-						fmt.Println("processed res: " + x)
+						//fmt.Println("processed res: " + x)
+						fmt.Println("INFO send back processed result ...")
 
 						conn.Publish(conn.Cfg, []byte(x))
-						return
-					case <-time.After(10 * time.Second):
-						fmt.Println("FAIL res: ")
-						return
+						// return
+						// case <-time.After(10 * time.Second):
+						// 	fmt.Println("FAIL res: ")
+						// 	return
 					}
 				}
 			}(handler)

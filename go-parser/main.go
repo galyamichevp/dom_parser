@@ -49,6 +49,7 @@ func main() {
 	ch := sockets.SetupRMQ(cfg)
 
 	ch.AddProcessor("test", p.ProcessorChan)
+	ch.AddProcessor("out", p.ProcessorChanOut)
 
 	ch.Subscribe(cfg)
 

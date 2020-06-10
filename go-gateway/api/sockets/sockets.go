@@ -28,7 +28,7 @@ func SetupRMQ(cfg *configs.Configuration) *Conn {
 	// income queue with web pages
 	buildChannel(amqpChannel, cfg.RMQ.ExchangeIn, cfg.RMQ.ExchangeTypeIn, cfg.RMQ.QueueIn, cfg.RMQ.RoutingKeyIn, cfg.RMQ.Concurrency)
 	// outcome queue to send parse result
-	buildChannel(amqpChannel, cfg.RMQ.ExchangeOut, cfg.RMQ.ExchangeTypeOut, cfg.RMQ.QueueOut, cfg.RMQ.RoutingKeyOut, cfg.RMQ.Concurrency)
+	//buildChannel(amqpChannel, cfg.RMQ.ExchangeOut, cfg.RMQ.ExchangeTypeOut, cfg.RMQ.QueueOut, cfg.RMQ.RoutingKeyOut, cfg.RMQ.Concurrency)
 
 	return &Conn{
 		Channel:    amqpChannel,
@@ -43,11 +43,12 @@ func (conn *Conn) Publish(cfg *configs.Configuration, body []byte) error {
 
 	if _, ok := conn.Processors[e]; ok {
 		for _, handler := range conn.Processors[e] {
-			go func(handler chan string) {
+			go func(handler chan string, body []byte, cfg *configs.Configuration) {
 				for {
 					select {
 					case body := <-handler:
-						fmt.Println("processed res: " + body)
+						//fmt.Println("processed res: " + body)
+						fmt.Println("Sent request to: " + cfg.RMQ.ExchangeOut)
 
 						message := amqp.Publishing{
 							//DeliveryMode: amqp.Persistent,
@@ -75,7 +76,7 @@ func (conn *Conn) Publish(cfg *configs.Configuration, body []byte) error {
 						// 	return
 					}
 				}
-			}(handler)
+			}(handler, body, cfg)
 		}
 	}
 
@@ -123,6 +124,9 @@ func (conn *Conn) Subscribe(cfg *configs.Configuration) error {
 		fmt.Printf("Processing messages on thread %v...\n", i)
 		go func() {
 			for msg := range messageChannel {
+
+				fmt.Println("INCOME msg ... ")
+
 				if conn.handler(msg) {
 					msg.Ack(false)
 				} else {
@@ -198,7 +202,7 @@ func (conn *Conn) handler(msg amqp.Delivery) bool {
 		fmt.Println("Error, no message body!")
 		return false
 	}
-	fmt.Println("income message: " + string(msg.Body))
+	//fmt.Println("==========> income message: " + string(msg.Body))
 
 	conn.emit("test", string(msg.Body))
 
@@ -209,9 +213,9 @@ func (conn *Conn) handler(msg amqp.Delivery) bool {
 func (conn *Conn) emit(e string, response string) {
 	if _, ok := conn.Processors[e]; ok {
 		for _, handler := range conn.Processors[e] {
-			go func(handler chan string) {
+			go func(handler chan string, response string) {
 				handler <- response
-			}(handler)
+			}(handler, response)
 		}
 	}
 }

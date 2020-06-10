@@ -10,7 +10,10 @@ import (
 	"log"
 	"mime/multipart"
 	"net/http"
-	"time"
+	"regexp"
+	"sort"
+	"strconv"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -32,9 +35,35 @@ func GetTodos(c *gin.Context) {
 	}
 }
 
+type ByPercent []core.SPBStock
+
+func (a ByPercent) Len() int           { return len(a) }
+func (a ByPercent) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
+func (a ByPercent) Less(i, j int) bool { return a[i].Percent > a[j].Percent }
+
 //GetStocks - get resourse
 func (c *Controller) GetStocks(context *gin.Context) {
-	context.JSON(http.StatusOK, c.Proc.SPBStocks)
+	arr := make([]core.SPBStock, len(c.Proc.SPBStocks))
+
+	r, _ := regexp.Compile("[0-9]+.[0-9]+")
+
+	for i := 0; i < len(c.Proc.SPBStocks); i++ {
+
+		if c.Proc.SPBStocks[i].Today != nil {
+			res := r.FindString(c.Proc.SPBStocks[i].Today[5])
+
+			f, err := strconv.ParseFloat(res, 64)
+			if err == nil {
+				c.Proc.SPBStocks[i].Percent = f
+			}
+		}
+
+		arr[i] = c.Proc.SPBStocks[i]
+	}
+
+	sort.Sort(ByPercent(arr))
+
+	context.JSON(http.StatusOK, arr)
 	// var todo []domain.Todo
 	// err := domain.GetAllTodos(&todo)
 	// if err != nil {
@@ -69,6 +98,7 @@ func GetResourceResult(c *gin.Context) {
 type PayloadRMQ struct {
 	Content string
 	Type    string
+	Marker  string
 }
 
 type PostReq struct {
@@ -80,9 +110,9 @@ type PostReq struct {
 //DownloadResource - load resource by URI and send to parser
 func (c *Controller) DownloadResource(context *gin.Context) {
 
-	data, _ := ioutil.ReadAll(context.Request.Body)
+	//data, _ := ioutil.ReadAll(context.Request.Body)
 
-	log.Printf("INFO: document request: %v", string(data))
+	// log.Printf("INFO: document request: %v", string(data))
 
 	// unmarshal and create docMsg
 	postReq := PostReq{}
@@ -91,11 +121,11 @@ func (c *Controller) DownloadResource(context *gin.Context) {
 	// 	log.Printf("ERROR: fail unmarshl: %s", err.Error)
 	// }
 	if context.ShouldBind(&postReq) == nil {
-		log.Println(postReq.Type)
+		// log.Println(postReq.Type)
 	}
 
 	// ...
-	var payload = ""
+	// var payload = ""
 
 	if postReq.Type == "resource.spb" {
 		state := make([]map[string]string, 5)
@@ -122,15 +152,15 @@ func (c *Controller) DownloadResource(context *gin.Context) {
 
 		for x := 0; x < 5; x++ {
 			for i := 0; i < 21; i++ {
-				time.Sleep(1 * time.Second)
+				//time.Sleep(2 * time.Second)
 
 				page := fmt.Sprintf("%02d", i) //strconv.Itoa(i)
 
-				payload = spbRequestResource(page, state[x]["viewState"], state[x]["eventValidation"])
+				p := spbRequestResource(page, state[x]["viewState"], state[x]["eventValidation"])
 
 				pkg := PayloadRMQ{
 					Type:    postReq.Type,
-					Content: payload,
+					Content: p,
 				}
 				out, err := json.Marshal(pkg)
 				if err != nil {
@@ -139,6 +169,29 @@ func (c *Controller) DownloadResource(context *gin.Context) {
 
 				c.RChan <- string(out)
 			}
+		}
+	}
+
+	if postReq.Type == "resource.marketbeat" {
+
+		for _, item := range c.Proc.SPBStocks {
+			var p string
+			if len(item.Marker) > 0 {
+				p = marketbeatRequestResource(item)
+			}
+
+			// ...
+			pkg := PayloadRMQ{
+				Type:    postReq.Type,
+				Content: p,
+				Marker:  item.Marker,
+			}
+			out, err := json.Marshal(pkg)
+			if err != nil {
+				log.Printf("ERROR: fail marshl: %s", err.Error)
+			}
+
+			c.RChan <- string(out)
 		}
 	}
 
@@ -231,19 +284,36 @@ func spbRequestResource(page, viewState, eventValidation string) string {
 	resp, err := client.Do(req)
 	defer resp.Body.Close()
 	body, err := ioutil.ReadAll(resp.Body)
-	//body, err := ioutil.ReadAll(res.Body)
-
-	fmt.Println(string(body))
 
 	if resp.StatusCode == http.StatusOK {
-
-		bodyString := string(body)
-
-		log.Printf("RESPONSE:  %s", bodyString)
-
-		return bodyString
+		return string(body)
 	}
 
 	return ""
 
+}
+
+func marketbeatRequestResource(stock core.SPBStock) string {
+	url := "https://www.marketbeat.com/stocks/NASDAQ/" + stock.Marker + "/price-target/"
+	method := "GET"
+
+	payload := strings.NewReader("")
+
+	client := &http.Client{}
+	req, err := http.NewRequest(method, url, payload)
+
+	if err != nil {
+		fmt.Println(err)
+	}
+	req.Header.Add("Cookie", "__cfduid=dc5e7c74b8f21b5e474a454d5481dd8281591791238; ASP.NET_SessionId=")
+
+	resp, err := client.Do(req)
+	defer resp.Body.Close()
+	body, err := ioutil.ReadAll(resp.Body)
+
+	if resp.StatusCode == http.StatusOK {
+		return string(body)
+	}
+
+	return ""
 }
