@@ -38,28 +38,71 @@ func SetupRMQ(cfg *configs.Configuration) *Conn {
 
 // Publish - publish message to RMQ
 func (conn *Conn) Publish(cfg *configs.Configuration, body []byte) error {
-	log.Printf("send message to exchange")
 
-	message := amqp.Publishing{
-		//DeliveryMode: amqp.Persistent,
-		//Timestamp:    time.Now(),
-		//ContentType:  "text/plain",
-		//Body:         []byte(body),
-		Headers:         amqp.Table{},
-		ContentType:     "text/plain",
-		ContentEncoding: "",
-		Body:            body,
-		DeliveryMode:    1, // 1=non-persistent, 2=persistent
-		Priority:        0, // 0-9
+	e := "ctrl"
+
+	if _, ok := conn.Processors[e]; ok {
+		for _, handler := range conn.Processors[e] {
+			go func(handler chan string) {
+				for {
+					select {
+					case body := <-handler:
+						fmt.Println("processed res: " + body)
+
+						message := amqp.Publishing{
+							//DeliveryMode: amqp.Persistent,
+							//Timestamp:    time.Now(),
+							//ContentType:  "text/plain",
+							//Body:         []byte(body),
+							Headers:         amqp.Table{},
+							ContentType:     "text/plain",
+							ContentEncoding: "",
+							Body:            []byte(body),
+							DeliveryMode:    1, // 1=non-persistent, 2=persistent
+							Priority:        0, // 0-9
+						}
+
+						conn.Channel.Publish(
+							cfg.RMQ.ExchangeOut,   // publish to an exchange
+							cfg.RMQ.RoutingKeyOut, // routing to 0 or more queues
+							false,                 // mandatory
+							false,                 // immediate
+							message,
+						)
+						// return
+						// case <-time.After(10 * time.Second):
+						// 	fmt.Println("FAIL res: ")
+						// 	return
+					}
+				}
+			}(handler)
+		}
 	}
 
-	return conn.Channel.Publish(
-		cfg.RMQ.ExchangeOut,   // publish to an exchange
-		cfg.RMQ.RoutingKeyOut, // routing to 0 or more queues
-		false,                 // mandatory
-		false,                 // immediate
-		message,
-	)
+	// log.Printf("send message to exchange")
+
+	// message := amqp.Publishing{
+	// 	//DeliveryMode: amqp.Persistent,
+	// 	//Timestamp:    time.Now(),
+	// 	//ContentType:  "text/plain",
+	// 	//Body:         []byte(body),
+	// 	Headers:         amqp.Table{},
+	// 	ContentType:     "text/plain",
+	// 	ContentEncoding: "",
+	// 	Body:            body,
+	// 	DeliveryMode:    1, // 1=non-persistent, 2=persistent
+	// 	Priority:        0, // 0-9
+	// }
+
+	// return conn.Channel.Publish(
+	// 	cfg.RMQ.ExchangeOut,   // publish to an exchange
+	// 	cfg.RMQ.RoutingKeyOut, // routing to 0 or more queues
+	// 	false,                 // mandatory
+	// 	false,                 // immediate
+	// 	message,
+	// )
+
+	return nil
 }
 
 // Subscribe - subscribe to RMQ

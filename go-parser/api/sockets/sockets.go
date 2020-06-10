@@ -14,6 +14,7 @@ import (
 type Conn struct {
 	Channel    *amqp.Channel
 	Processors map[string][]chan string
+	Cfg        *configs.Configuration
 }
 
 //SetupRMQ - setup RMQ instance
@@ -34,6 +35,7 @@ func SetupRMQ(cfg *configs.Configuration) *Conn {
 	return &Conn{
 		Channel:    amqpChannel,
 		Processors: make(map[string][]chan string),
+		Cfg:        cfg,
 	}
 }
 
@@ -173,6 +175,8 @@ func (conn *Conn) emit(e string, response string) {
 					select {
 					case x := <-handler:
 						fmt.Println("processed res: " + x)
+
+						conn.Publish(conn.Cfg, []byte(x))
 						return
 					case <-time.After(10 * time.Second):
 						fmt.Println("FAIL res: ")

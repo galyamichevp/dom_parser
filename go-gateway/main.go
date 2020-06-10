@@ -1,6 +1,7 @@
 package main
 
 import (
+	"go-dom-parser/api/controllers"
 	"go-dom-parser/api/routes"
 	"go-dom-parser/api/sockets"
 	"go-dom-parser/configs"
@@ -34,6 +35,16 @@ func main() {
 
 	// === Processor ===
 
+	// === Setup Controller ===
+
+	controller := controllers.Controller{
+		Str:   "test",
+		RChan: make(chan string),
+		Proc:  p,
+	}
+
+	// === Setup Controller ===
+
 	// === RMQ configuration ===
 
 	data := []byte("hello world --- xxx")
@@ -42,6 +53,8 @@ func main() {
 
 	ch.AddProcessor("test", p.ProcessorChan)
 
+	ch.AddProcessor("ctrl", controller.RChan)
+
 	ch.Publish(cfg, data)
 
 	ch.Subscribe(cfg)
@@ -49,7 +62,7 @@ func main() {
 	// === RMQ configuration ===
 
 	// define routes
-	router := routes.SetupRouter()
+	router := routes.SetupRouter(controller)
 
 	// run server
 	router.Run(":" + strconv.Itoa(cfg.Host.Port))
