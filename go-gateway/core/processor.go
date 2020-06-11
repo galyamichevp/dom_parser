@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-	"strconv"
 )
 
 type Processor struct {
@@ -59,17 +58,11 @@ func (p *Processor) Run() {
 				log.Printf("ERROR: fail unmarshl: %s", err.Error)
 			}
 
-			fmt.Println("==========> income message: " + payload.Type)
-			fmt.Println("==========> income message: " + payload.Marker)
-
 			if payload.Type == "result.spb" {
 				p.LoadSpbStocks(payload.Content)
-				fmt.Println("INFO: result SPB for marker ... " + payload.Marker)
 			}
 
 			if payload.Type == "result.marketbeat" {
-				fmt.Println("==========> income message: " + payload.Content)
-
 				p.loadMarketBeatStocks(payload.Content)
 				fmt.Println("INFO: result MarketBeat for marker ... " + payload.Marker)
 			}
@@ -84,7 +77,7 @@ func (p *Processor) LoadSpbStocks(data string) {
 	var arr []SPBStock
 	_ = json.Unmarshal([]byte(data), &arr)
 
-	fmt.Println("INFO: load spb stocks ..." + strconv.Itoa(len(arr)))
+	// fmt.Println("INFO: load spb stocks ..." + strconv.Itoa(len(arr)))
 
 	p.SPBStocks = append(p.SPBStocks, arr...)
 }
@@ -102,7 +95,7 @@ func (p *Processor) loadMarketBeatStocks(data string) {
 	_ = json.Unmarshal([]byte(data), &mb)
 
 	for i, val := range p.SPBStocks {
-		if val.Marker == mb.Marker {
+		if val.Marker == mb.Marker && mb.Today != nil {
 			p.SPBStocks[i].Today = mb.Today
 			p.SPBStocks[i].Days30 = mb.Days30
 			p.SPBStocks[i].Days90 = mb.Days90

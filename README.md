@@ -22,3 +22,14 @@ tbd
 
 ## deployment doagram
 ![deployment diagram](https://github.com/galyamichevp/go-dom-parser/blob/master/architecture/deployment.png?raw=true)
+
+## stock resources
+- https://www.etfchannel.com/symbol/sage/price-target/
+- https://thefly.com/news.php?symbol=SAGE
+- https://www.marketscreener.com/SAGE-THERAPEUTICS-INC-16917559/consensus/
+- https://www.barchart.com/stocks/quotes/SAGE/analyst-ratings
+- https://www.zacks.com/stock/quote/CHK?q=CHK
+- https://money.cnn.com/quote/forecast/forecast.html?symb=SAGE#:~:text=Stock%20Price%20Forecast,the%20last%20price%20of%2035.99.
+- https://www.tipranks.com/stocks/sage/price-target
+- https://gov.capital/stock/sage-stock/
+- https://stockinvest.us/technical-analysis/SAGE

@@ -80,29 +80,6 @@ func (conn *Conn) Publish(cfg *configs.Configuration, body []byte) error {
 		}
 	}
 
-	// log.Printf("send message to exchange")
-
-	// message := amqp.Publishing{
-	// 	//DeliveryMode: amqp.Persistent,
-	// 	//Timestamp:    time.Now(),
-	// 	//ContentType:  "text/plain",
-	// 	//Body:         []byte(body),
-	// 	Headers:         amqp.Table{},
-	// 	ContentType:     "text/plain",
-	// 	ContentEncoding: "",
-	// 	Body:            body,
-	// 	DeliveryMode:    1, // 1=non-persistent, 2=persistent
-	// 	Priority:        0, // 0-9
-	// }
-
-	// return conn.Channel.Publish(
-	// 	cfg.RMQ.ExchangeOut,   // publish to an exchange
-	// 	cfg.RMQ.RoutingKeyOut, // routing to 0 or more queues
-	// 	false,                 // mandatory
-	// 	false,                 // immediate
-	// 	message,
-	// )
-
 	return nil
 }
 
@@ -202,7 +179,6 @@ func (conn *Conn) handler(msg amqp.Delivery) bool {
 		fmt.Println("Error, no message body!")
 		return false
 	}
-	//fmt.Println("==========> income message: " + string(msg.Body))
 
 	conn.emit("test", string(msg.Body))
 

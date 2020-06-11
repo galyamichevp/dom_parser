@@ -188,7 +188,7 @@ func (conn *Conn) observe(e string) {
 					select {
 					case x := <-handler:
 						//fmt.Println("processed res: " + x)
-						fmt.Println("INFO send back processed result ...")
+						//fmt.Println("INFO send back processed result ...")
 
 						conn.Publish(conn.Cfg, []byte(x))
 						// return
