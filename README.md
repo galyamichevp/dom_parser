@@ -33,3 +33,4 @@ tbd
 - https://www.tipranks.com/stocks/sage/price-target
 - https://gov.capital/stock/sage-stock/
 - https://stockinvest.us/technical-analysis/SAGE
+- https://www.nasdaq.com/market-activity/stocks/chk/real-time

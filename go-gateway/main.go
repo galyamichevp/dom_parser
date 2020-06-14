@@ -38,7 +38,6 @@ func main() {
 	// === Setup Controller ===
 
 	controller := controllers.Controller{
-		Str:   "test",
 		RChan: make(chan string),
 		Proc:  p,
 	}

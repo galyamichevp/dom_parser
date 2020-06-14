@@ -58,11 +58,11 @@ func (p *Processor) Run() {
 				log.Printf("ERROR: fail unmarshl: %s", err.Error)
 			}
 
-			if payload.Type == "result.spb" {
+			if payload.Type == "result.spb.foreignexchange" {
 				p.LoadSpbStocks(payload.Content)
 			}
 
-			if payload.Type == "result.marketbeat" {
+			if payload.Type == "result.marketbeat.ratings" {
 				p.loadMarketBeatStocks(payload.Content)
 				fmt.Println("INFO: result MarketBeat for marker ... " + payload.Marker)
 			}
