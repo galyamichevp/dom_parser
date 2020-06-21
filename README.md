@@ -7,6 +7,8 @@ https://medium.com/@_ektagarg/golang-a-todo-app-using-gin-980ebb7853c8
 
 https://dev.to/olushola_k/working-with-rabbitmq-in-golang-1kmj
 
+https://levelup.gitconnected.com/build-a-todo-app-in-golang-mongodb-and-react-e1357b4690a6
+
 # Goals
 
 # Architecture
