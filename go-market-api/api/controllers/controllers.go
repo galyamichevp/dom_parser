@@ -54,6 +54,11 @@ func (controller *Controller) GetSymbols(context *gin.Context) {
 		}
 
 		s := controller.Storage.GetSymbol(symbol)
+
+		if s.Ratings["marketbeat"].TragetPercent < requestQuery.PercentLimit {
+			continue
+		}
+
 		symbols = append(symbols, s)
 	}
 
@@ -65,11 +70,6 @@ func (controller *Controller) GetSymbols(context *gin.Context) {
 	}
 	if requestQuery.SortByPercent == "desc" {
 		sort.Sort(SortDescByRatingPercent(symbols))
-	}
-
-	if requestQuery.PercentLimit != "" {
-		// lim, _ := strconv.Atoi(requestQuery.PercentLimit)
-		// symbols = symbols[:lim]
 	}
 
 	context.JSON(http.StatusOK, symbols)

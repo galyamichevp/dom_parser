@@ -4,6 +4,7 @@ import (
 	"go-dom-parser/api/sockets"
 	"go-dom-parser/domain"
 	"go-dom-parser/scheduler/jobs"
+	"time"
 )
 
 //SetupScheduler - initialize scheduler
@@ -34,6 +35,11 @@ func SetupScheduler(storage *domain.Storage, socket *sockets.Socket) *Scheduler 
 	socket.AddChannel("nasdaq.loadrealtime", realTimeChan)
 	// ...
 
+	// ... nasdaq load history job
+	historyChan := make(chan string)
+	socket.AddChannel("nasdaq.loadhistory", historyChan)
+	// ...
+
 	jobs := []jobs.Job{
 		jobs.SpbExchange{
 			SymbolChan: symbolChan,
@@ -46,6 +52,7 @@ func SetupScheduler(storage *domain.Storage, socket *sockets.Socket) *Scheduler 
 			InfoChan:     infoChan,
 			SummaryChan:  summaryChan,
 			RealTimeChan: realTimeChan,
+			HistoryChan:  historyChan,
 			Storage:      storage,
 		},
 	}
@@ -59,6 +66,7 @@ func SetupScheduler(storage *domain.Storage, socket *sockets.Socket) *Scheduler 
 //RunJobs - run spb exchange job
 func (scheduler *Scheduler) RunJobs() {
 	for _, job := range scheduler.Jobs {
+		time.Sleep(5 * time.Second)
 		job.RunJob()
 	}
 }

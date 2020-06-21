@@ -8,7 +8,7 @@ import (
 
 // FindPercentValue - find percent value in string
 func FindPercentValue(source string) (float64, error) {
-	r, _ := regexp.Compile("[0-9,.]+")
+	r, _ := regexp.Compile("[0-9,.+-]+")
 
 	res := r.FindString(source)
 

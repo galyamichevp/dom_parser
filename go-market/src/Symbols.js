@@ -4,10 +4,10 @@ import { Card, Header, Form, Input, Icon, Grid, Label, Button } from "semantic-u
 
 let endpoint = "http://localhost:8001/api/v1";
 
+
 class Symbols extends Component {
   constructor(props) {
     super(props);
-
     this.state = {
       task: "",
       symbols: []
@@ -16,6 +16,13 @@ class Symbols extends Component {
 
   componentDidMount() {
     this.getSymbols();
+  }
+
+  componentDidUpdate(prevProps) {
+    // // Популярный пример (не забудьте сравнить пропсы):
+    // if (this.props.userID !== prevProps.userID) {
+    //   this.fetchData(this.props.userID);
+    // }
   }
 
   onChange = event => {
@@ -51,7 +58,7 @@ class Symbols extends Component {
   };
 
   getSymbols = () => {
-    axios.get(endpoint + "/symbols?sort_percent=desc&percent_limit=20").then(res => {
+    axios.get(endpoint + "/symbols?sort_percent=desc&percent_limit=60").then(res => {
       console.log(res);
       if (res.data) {
         this.setState({
@@ -69,59 +76,83 @@ class Symbols extends Component {
                     <div style={{ wordWrap: "break-word" }}>{item.symbol}</div>
                   </Card.Header>
                   <Card.Meta textAlign="left">
-                    <div>Target:
-                      <p style={{ fontSize: "8pt" }}>Percent: {item.ratings && Object.keys(item.ratings).length > 0 && item.ratings['marketbeat'].targetPercent}</p>
-                      <p style={{ fontSize: "8pt" }}>Price: {item.ratings && Object.keys(item.ratings).length > 0 && item.ratings['marketbeat'].targetPrice}</p>
-                    </div>
-                    <div>Info:
-                      <p style={{ fontSize: "8pt" }}>PreviousClose: {item.infos && Object.keys(item.infos).length > 0 && item.infos['nasdaq'].previousClose}</p>
-                      <p style={{ fontSize: "8pt" }}>LastSalePrice: {item.infos && Object.keys(item.infos).length > 0 && item.infos['nasdaq'].lastSalePrice}</p>
-                      <p style={{ fontSize: "8pt" }}>PercentageChange: {item.infos && Object.keys(item.infos).length > 0 && item.infos['nasdaq'].percentageChange}</p>
-                    </div>
-                    <div>Summary:
-                      <p style={{ fontSize: "8pt" }}>Sector: {item.summaries && Object.keys(item.summaries).length > 0 && item.summaries['nasdaq'].sector}</p>
-                      <p style={{ fontSize: "8pt" }}>Industry: {item.summaries && Object.keys(item.summaries).length > 0 && item.summaries['nasdaq'].industry}</p>
-                      <p style={{ fontSize: "8pt" }}>TodayHighLow: {item.summaries && Object.keys(item.summaries).length > 0 && item.summaries['nasdaq'].todayHighLow}</p>
-                      <p style={{ fontSize: "8pt" }}>52 wk H/L: {item.summaries && Object.keys(item.summaries).length > 0 && item.summaries['nasdaq'].fiftTwoWeekHighLow}</p>
-                      <p style={{ fontSize: "8pt" }}>EPS: {item.summaries && Object.keys(item.summaries).length > 0 && item.summaries['nasdaq'].earningsPerShare}</p>
-                    </div>
-                  </Card.Meta>
 
-                  <Card.Meta textAlign="right">
-                    {
-                      item.infos && Object.keys(item.infos).length > 0 && item.infos['nasdaq'].deltaIndicator === "up" ?
-                        (<Icon
-                          name="arrow circle up"
-                          color="green"
-                          onClick={() => this.updateTask(item.id)}
-                        />)
-                        :
-                        (<Icon
-                          name="arrow circle down"
-                          color="red"
-                          onClick={() => this.updateTask(item.id)}
-                        />)
-                    }
-                    {/* <Icon
-                      name="check circle"
-                      color="green"
-                      onClick={() => this.updateTask(item.id)}
-                    />
-                    <span style={{ paddingRight: 10 }}>Done</span>
-                    <Icon
-                      name="undo"
-                      color="yellow"
-                      onClick={() => this.undoTask(item.id)}
-                    />
-                    <span style={{ paddingRight: 10 }}>Undo</span>
-                    <Icon
-                      name="delete"
-                      color="red"
-                      onClick={() => this.deleteTask(item.id)}
-                    />
-                    <span style={{ paddingRight: 10 }}>Delete</span> */}
+                    <Grid columns={4} divided>
+                      <Grid.Row>
+                        <Grid.Column>
+                          <div>Target:
+                            <p style={{ fontSize: "8pt" }}>Percent: {item.ratings && Object.keys(item.ratings).length > 0 && item.ratings['marketbeat'].targetPercent}</p>
+                            <p style={{ fontSize: "8pt" }}>Price: {item.ratings && Object.keys(item.ratings).length > 0 && item.ratings['marketbeat'].targetPrice}</p>
+                          </div>
+                        </Grid.Column>
+                        <Grid.Column>
+                          <div>Info:
+                            <p style={{ fontSize: "8pt" }}>PreviousClose: {item.infos && Object.keys(item.infos).length > 0 && item.infos['nasdaq'].previousClose}</p>
+                            <p style={{ fontSize: "8pt" }}>LastSalePrice: {item.infos && Object.keys(item.infos).length > 0 && item.infos['nasdaq'].lastSalePrice}</p>
+                            <p style={{ fontSize: "8pt" }}>PercentageChange: {item.infos && Object.keys(item.infos).length > 0 && item.infos['nasdaq'].percentageChange}</p>
+                          </div>
+                        </Grid.Column>
+                        <Grid.Column>
+                          <div>Summary:
+                            <p style={{ fontSize: "8pt" }}>Sector: {item.summaries && Object.keys(item.summaries).length > 0 && item.summaries['nasdaq'].sector}</p>
+                            <p style={{ fontSize: "8pt" }}>Industry: {item.summaries && Object.keys(item.summaries).length > 0 && item.summaries['nasdaq'].industry}</p>
+                            <p style={{ fontSize: "8pt" }}>TodayHighLow: {item.summaries && Object.keys(item.summaries).length > 0 && item.summaries['nasdaq'].todayHighLow}</p>
+                            <p style={{ fontSize: "8pt" }}>52 wk H/L: {item.summaries && Object.keys(item.summaries).length > 0 && item.summaries['nasdaq'].fiftTwoWeekHighLow}</p>
+                            <p style={{ fontSize: "8pt" }}>EPS: {item.summaries && Object.keys(item.summaries).length > 0 && item.summaries['nasdaq'].earningsPerShare}</p>
+                          </div>
+                        </Grid.Column>
+                      </Grid.Row>
+                    </Grid>
                   </Card.Meta>
                 </Card.Content>
+                <Grid style={{ margin: "2px" }}>
+                  <Grid.Row columns={8}>
+                    <Grid.Column>
+                      <Icon
+                        name="arrow circle down"
+                        color="red"
+                        onClick={() => this.updateTask(item.id)}
+                      />
+                      <span>Text</span>
+                    </Grid.Column>
+                    <Grid.Column>
+                      {
+                        item.summaries && Object.keys(item.summaries).length > 0 && item.summaries['nasdaq'].earningsPerShare > -10 ?
+                          <Icon
+                            name="thumbs up outline"
+                            color="green"
+                          />
+                          :
+                          <Icon
+                            name="thumbs down outline"
+                            color="red"
+                          />
+                      }
+                      <span>EPS({item.summaries && Object.keys(item.summaries).length > 0 && item.summaries['nasdaq'].earningsPerShare})</span>
+                    </Grid.Column>
+                    <Grid.Column>
+                      {
+                        item.infos && Object.keys(item.infos).length > 0 && item.infos['nasdaq'].deltaIndicator === "up" ?
+                          (<Icon
+                            name="arrow circle up"
+                            color="green"
+                          />)
+                          : item.infos && Object.keys(item.infos).length > 0 && item.infos['nasdaq'].deltaIndicator === "down" ?
+                            (<Icon
+                              name="arrow circle down"
+                              color="red"
+                            />)
+                            :
+                            (<Icon
+                              name="pause circle"
+                              color="yellow"
+                            />)
+                      }
+                      <span>{item.infos && Object.keys(item.infos).length > 0 && item.infos['nasdaq'].percentageChange}</span>
+                    </Grid.Column>
+                  </Grid.Row>
+                </Grid>
+
               </Card>
             );
           })

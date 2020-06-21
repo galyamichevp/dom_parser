@@ -51,6 +51,18 @@ func (processor *Processor) RunProcessor() {
 						processor.nasdaqParseSummary(payload)
 					}
 
+					if key == "nasdaq.loadrealtime" {
+						// fmt.Println("INFO: symbol loading ...")
+
+						processor.nasdaqParseRealTime(payload)
+					}
+
+					if key == "nasdaq.loadhistory" {
+						// fmt.Println("INFO: symbol loading ...")
+
+						processor.nasdaqParseHistory(payload)
+					}
+
 				}
 			}
 		}(key, channel)

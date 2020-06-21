@@ -68,20 +68,20 @@ class Filters extends Component {
     this.getSymbols();
   }
 
+  onXChange = (e, data) => {
+  }
+
 
   render() {
     const { selected } = this.state;
-
     return (
       <div>
+        <Label style={{ margin: "5px" }}>
+          Filters
+        </Label>
         <Grid divided='vertically'>
-          <Grid.Row columns={3}>
-            <Grid.Column width={1}>
-              <Label style={{ margin: "5px" }}>
-                Filters
-              </Label>
-            </Grid.Column>
-            <Grid.Column>
+          <Grid.Row columns={5}>
+            <Grid.Column width={3}>
               <Dropdown
                 placeholder='Symbols'
                 fluid
@@ -93,10 +93,19 @@ class Filters extends Component {
                 value={selected}
               />
             </Grid.Column>
-            <Grid.Column>
+            <Grid.Column width={1}>
               <Button icon onClick={this.onReload}>
                 <Icon name='refresh' />
               </Button>
+            </Grid.Column>
+            <Grid.Column>
+              <Input placeholder='Target Percent limit' onChange={this.onXChange}/>
+            </Grid.Column>
+            <Grid.Column>
+
+            </Grid.Column>
+            <Grid.Column>
+
             </Grid.Column>
           </Grid.Row>
         </Grid>

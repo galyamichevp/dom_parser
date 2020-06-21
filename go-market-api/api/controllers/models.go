@@ -16,8 +16,8 @@ type ResourcesGetRequest struct {
 
 // SymbolsGetRequest - query model allowed to get symbols
 type SymbolsGetRequest struct {
-	SortByPercent string `form:"sort_percent"`
-	PercentLimit  string `form:"percent_limit"`
+	SortByPercent string  `form:"sort_percent"`
+	PercentLimit  float64 `form:"percent_limit"`
 }
 
 // FilterPostRequest - query model allowed to post filter

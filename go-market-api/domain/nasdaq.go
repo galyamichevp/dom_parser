@@ -91,3 +91,61 @@ type BetaX struct {
 	Label string `json:"label"`
 	Value int64  `json:"value"`
 }
+
+type NasdaqRealTime struct {
+	Data    RealTimeData `json:"data"`
+	Message interface{}  `json:"message"`
+	Status  Status       `json:"status"`
+}
+
+type RealTimeData struct {
+	Symbol       string            `json:"symbol"`
+	TotalRecords int64             `json:"totalRecords"`
+	Offset       int64             `json:"offset"`
+	Limit        int64             `json:"limit"`
+	Headers      RealTimeHeaders   `json:"headers"`
+	Rows         []RealTimeHeaders `json:"rows"`
+}
+
+type RealTimeHeaders struct {
+	NLSTime        string `json:"nlsTime"`
+	NLSPrice       string `json:"nlsPrice"`
+	NLSShareVolume string `json:"nlsShareVolume"`
+}
+
+// ... history
+type NasdaqHistory struct {
+	Data    NasdaqHistoryData `json:"data"`
+	Message interface{}       `json:"message"`
+	Status  Status            `json:"status"`
+}
+
+type NasdaqHistoryData struct {
+	Symbol           string               `json:"symbol"`
+	Company          string               `json:"company"`
+	TimeAsOf         string               `json:"timeAsOf"`
+	IsNasdaq100      bool                 `json:"isNasdaq100"`
+	LastSalePrice    string               `json:"lastSalePrice"`
+	NetChange        string               `json:"netChange"`
+	PercentageChange string               `json:"percentageChange"`
+	DeltaIndicator   string               `json:"deltaIndicator"`
+	PreviousClose    string               `json:"previousClose"`
+	Chart            []NasdaqHistoryChart `json:"chart"`
+	Events           interface{}          `json:"events"`
+}
+
+type NasdaqHistoryChart struct {
+	Z NasdaqHistoryZ `json:"z"`
+	X int64          `json:"x"`
+	Y float64        `json:"y"`
+}
+
+type NasdaqHistoryZ struct {
+	High     string `json:"high"`
+	Low      string `json:"low"`
+	Open     string `json:"open"`
+	Close    string `json:"close"`
+	Volume   string `json:"volume"`
+	DateTime string `json:"dateTime"`
+	Value    string `json:"value"`
+}
