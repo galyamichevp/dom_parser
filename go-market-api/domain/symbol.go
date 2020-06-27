@@ -13,4 +13,5 @@ type Symbol struct {
 	Summaries   map[string]Summary   `json:"summaries"`
 	Indicators  map[string]Indicator `json:"indicators"`
 	Trades      map[string]Trade     `json:"trades"`
+	Histories   map[string]History   `json:"histories"`
 }

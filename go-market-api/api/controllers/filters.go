@@ -24,18 +24,19 @@ func (controller *Controller) SetFilter(context *gin.Context) {
 	requestQuery := FilterPostRequest{}
 	context.BindJSON(&requestQuery)
 
-	for _, symbol := range controller.Storage.Filters {
-		filter := controller.Storage.Filters[symbol.Symbol]
-		filter.IsActive = false
-		controller.Storage.Filters[symbol.Symbol] = filter
-	}
+	controller.Storage.SetFilterState(requestQuery.Symbol, requestQuery.State)
+	// for _, symbol := range controller.Storage.Filters {
+	// 	filter := controller.Storage.Filters[symbol.Symbol]
+	// 	filter.IsActive = false
+	// 	controller.Storage.Filters[symbol.Symbol] = filter
+	// }
 
-	for _, symbol := range requestQuery.Symbols {
-		controller.Storage.Filters[symbol] = domain.Filter{
-			IsActive: true,
-			Symbol:   symbol,
-		}
-	}
+	// for _, symbol := range requestQuery.Symbols {
+	// 	controller.Storage.Filters[symbol] = domain.Filter{
+	// 		IsActive: true,
+	// 		Symbol:   symbol,
+	// 	}
+	// }
 }
 
 // DeleteFilter - ...

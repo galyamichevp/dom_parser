@@ -7,7 +7,9 @@ type Summary struct {
 	Symbol             string  `json:"symbol"`
 	Sector             string  `json:"sector"`
 	Industry           string  `json:"industry"`
-	TodayHighLow       string  `json:"todayHighLow"`
+	TodayHigh          float64 `json:"todayHigh"`
+	TodayLow           float64 `json:"todayLow"`
+	TodayVolatility    float64 `json:"todayVolatility"`
 	ShareVolume        string  `json:"shareVolume"`
 	AverageVolume      string  `json:"averageVolume"`
 	PreviousClose      string  `json:"previousClose"`

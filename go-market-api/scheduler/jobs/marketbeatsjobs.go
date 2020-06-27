@@ -8,7 +8,6 @@ import (
 	"log"
 	"net/http"
 	"strings"
-	"time"
 )
 
 type MarketBeat struct {
@@ -18,17 +17,17 @@ type MarketBeat struct {
 
 //RunJob - run spb exchange job
 func (marketBeat MarketBeat) RunJob() {
-
 	go func() {
-		// time.Sleep(30 * time.Second)
 		for {
+			if !marketBeat.Storage.GetSync("marketbeat.loadratings") {
+				continue
+			}
+
 			for _, symbol := range marketBeat.Storage.GetSymbolsKeys() {
 
 				if marketBeat.Storage.SkipFilter(symbol) {
 					continue
 				}
-
-				time.Sleep(1 * time.Second)
 
 				marketBeat.marketBeatLoadAnalytics(symbol)
 			}

@@ -11,11 +11,13 @@ type Storage struct {
 	Filters      map[string]Filter `json:"filters"`
 	Locker       sync.RWMutex
 	FilterLocker sync.RWMutex
+	Sync         map[string]bool `json:"sync"`
 }
 
 func (s *Storage) Init() {
 	s.Symbols = make(map[string]Symbol)
 	s.Filters = make(map[string]Filter)
+	s.Sync = make(map[string]bool)
 }
 
 func (s *Storage) GetSymbols() map[string]Symbol {
@@ -46,6 +48,9 @@ func (s *Storage) GetSymbol(symbol string) Symbol {
 	if data.Trades == nil {
 		data.Trades = make(map[string]Trade)
 	}
+	if data.Histories == nil {
+		data.Histories = make(map[string]History)
+	}
 
 	return data
 }
@@ -67,6 +72,9 @@ func (s *Storage) GetSymbolUnsafe(symbol string) Symbol {
 	}
 	if data.Trades == nil {
 		data.Trades = make(map[string]Trade)
+	}
+	if data.Histories == nil {
+		data.Histories = make(map[string]History)
 	}
 
 	return data
@@ -110,15 +118,24 @@ func (s *Storage) ResetFilters() {
 }
 
 func (s *Storage) SetFilterSymbol(symbol string, filter Filter) {
-	s.FilterLocker.Lock()
-	defer s.FilterLocker.Unlock()
+	s.Locker.Lock()
+	defer s.Locker.Unlock()
 
 	s.Filters[symbol] = filter
 }
 
+func (s *Storage) SetFilterState(symbol string, state bool) {
+	s.Locker.Lock()
+	defer s.Locker.Unlock()
+
+	f := s.Filters[symbol]
+	f.IsActive = state
+	s.Filters[symbol] = f
+}
+
 func (s *Storage) SkipFilter(symbol string) bool {
-	s.FilterLocker.RLock()
-	defer s.FilterLocker.RUnlock()
+	s.Locker.RLock()
+	defer s.Locker.RUnlock()
 
 	var isActiveFilter bool
 	for _, symbol := range s.Filters {
@@ -132,6 +149,21 @@ func (s *Storage) SkipFilter(symbol string) bool {
 	b := s.Filters[symbol].IsActive
 
 	return a && !b
+}
+
+func (s *Storage) GetActiveFilterKeys() []string {
+	s.Locker.RLock()
+	defer s.Locker.RUnlock()
+
+	keys := make([]string, 0)
+
+	for key, filter := range s.Filters {
+		if filter.IsActive {
+			keys = append(keys, key)
+		}
+	}
+
+	return keys
 }
 
 func (s *Storage) SetRating(key string, rating Rating) {
@@ -153,6 +185,27 @@ func (s *Storage) SetSummary(key string, summary Summary) {
 	defer s.Locker.Unlock()
 
 	s.Symbols[summary.Symbol].Summaries[key] = summary
+}
+
+func (s *Storage) SetHistory(key string, history History) {
+	s.Locker.Lock()
+	defer s.Locker.Unlock()
+
+	s.Symbols[history.Symbol].Histories[key] = history
+}
+
+func (s *Storage) GetSync(key string) bool {
+	s.Locker.RLock()
+	defer s.Locker.RUnlock()
+
+	return s.Sync[key]
+}
+
+func (s *Storage) SetSync(key string, state bool) {
+	s.Locker.Lock()
+	defer s.Locker.Unlock()
+
+	s.Sync[key] = state
 }
 
 type RangeFunc func()

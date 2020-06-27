@@ -17,7 +17,7 @@ func SetupScheduler(storage *domain.Storage, socket *sockets.Socket) *Scheduler 
 
 	// ... marketbeat load analytics job
 	analyticChan := make(chan string)
-	socket.AddChannel("marketbeat.loadanalytics", analyticChan)
+	socket.AddChannel("marketbeat.loadratings", analyticChan)
 	// ...
 
 	// ... nasdaq load info job

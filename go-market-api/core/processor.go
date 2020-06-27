@@ -33,7 +33,7 @@ func (processor *Processor) RunProcessor() {
 						processor.spbExchangeParseSymbol(payload)
 					}
 
-					if key == "marketbeat.loadanalytics" {
+					if key == "marketbeat.loadratings" {
 						// fmt.Println("INFO: symbol loading ...")
 
 						processor.marketBeatParseAnalytics(payload)

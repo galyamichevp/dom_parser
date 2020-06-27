@@ -19,6 +19,8 @@ func SetupRouter(controller *controllers.Controller) *gin.Engine {
 
 	v1 := r.Group("/api/v1")
 	{
+		v1.POST("sync", controller.SetSync)
+
 		v1.GET("symbols", controller.GetSymbols)
 		v1.GET("resources/download", controller.DownloadResource)
 

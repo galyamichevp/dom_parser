@@ -18,28 +18,6 @@ func SetupController(storage *domain.Storage) *Controller {
 
 // GetSymbols - get all loaded symbols
 func (controller *Controller) GetSymbols(context *gin.Context) {
-	// arr := make([]core.SPBStock, len(c.Proc.SPBStocks))
-
-	// r, _ := regexp.Compile("[0-9,.]+")
-
-	// for i := 0; i < len(c.Proc.SPBStocks); i++ {
-
-	// 	if c.Proc.SPBStocks[i].Today != nil {
-	// 		res := r.FindString(c.Proc.SPBStocks[i].Today[5])
-
-	// 		res = strings.ReplaceAll(res, ",", "")
-
-	// 		f, err := strconv.ParseFloat(res, 64)
-	// 		if err == nil {
-	// 			c.Proc.SPBStocks[i].Percent = f
-	// 		}
-	// 	}
-
-	// 	arr[i] = c.Proc.SPBStocks[i]
-	// }
-
-	// sort.Sort(ByPercent(arr))
-
 	requestQuery := SymbolsGetRequest{}
 
 	if context.ShouldBind(&requestQuery) == nil {
@@ -49,13 +27,13 @@ func (controller *Controller) GetSymbols(context *gin.Context) {
 	symbols := make([]domain.Symbol, 0)
 
 	for _, symbol := range controller.Storage.GetSymbolsKeys() {
-		if controller.Storage.SkipFilter(symbol) {
-			continue
-		}
+		// if controller.Storage.SkipFilter(symbol) {
+		// 	continue
+		// }
 
 		s := controller.Storage.GetSymbol(symbol)
 
-		if s.Ratings["marketbeat"].TragetPercent < requestQuery.PercentLimit {
+		if s.Ratings["marketbeat"].TragetPercent < requestQuery.TargetPercent {
 			continue
 		}
 
@@ -64,15 +42,40 @@ func (controller *Controller) GetSymbols(context *gin.Context) {
 
 	sort.Sort(SortAscBySymbolId(symbols))
 
-	if requestQuery.SortByPercent == "asc" {
+	// ... filter by page
+	totalPages := (len(symbols) / requestQuery.PageSize) + 1
+
+	from := (requestQuery.Page - 1) * requestQuery.PageSize
+	if from > len(symbols) {
+		from = 0
+	}
+	to := ((requestQuery.Page - 1) * requestQuery.PageSize) + requestQuery.PageSize
+	if to > len(symbols) {
+		to = len(symbols)
+	}
+	symbols = symbols[from:to]
+
+	// ...
+
+	if requestQuery.SortTargetPercent == "asc" {
 		sort.Sort(SortAscByRatingPercent(symbols))
 
 	}
-	if requestQuery.SortByPercent == "desc" {
+	if requestQuery.SortTargetPercent == "desc" {
 		sort.Sort(SortDescByRatingPercent(symbols))
 	}
 
-	context.JSON(http.StatusOK, symbols)
+	response := struct {
+		Symbols    []domain.Symbol `json:"symbols"`
+		Filters    []string        `json:"filters"`
+		TotalPages int             `json:"totalPages"`
+	}{
+		symbols,
+		controller.Storage.GetActiveFilterKeys(),
+		totalPages,
+	}
+
+	context.JSON(http.StatusOK, response)
 }
 
 // DownloadResource - load resource by URI and send to parser

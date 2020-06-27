@@ -16,16 +16,25 @@ type ResourcesGetRequest struct {
 
 // SymbolsGetRequest - query model allowed to get symbols
 type SymbolsGetRequest struct {
-	SortByPercent string  `form:"sort_percent"`
-	PercentLimit  float64 `form:"percent_limit"`
+	SortTargetPercent string  `form:"sortTargetPercent"`
+	TargetPercent     float64 `form:"targetPercent"`
+	Page              int     `form:"page"`
+	PageSize          int     `form:"pageSize"`
 }
 
 // FilterPostRequest - query model allowed to post filter
 type FilterPostRequest struct {
-	Symbols []string `json:"symbols"`
+	Symbol string `json:"symbol"`
+	State  bool   `json:"state"`
 }
 
 // FilterDeleteRequest - query model allowed to delete filter
 type FilterDeleteRequest struct {
 	Symbol string `form:"symbol"`
+}
+
+// SyncPostRequest - query model allowed to post sync
+type SyncPostRequest struct {
+	Source string `json:"source"`
+	State  bool   `json:"state"`
 }

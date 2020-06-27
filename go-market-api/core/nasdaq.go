@@ -31,10 +31,17 @@ func (processor *Processor) nasdaqParseInfo(payload string) {
 	nasdaqInfo.Volume = info.Data.KeyStats.Volume.Value
 	nasdaqInfo.PreviousClose = info.Data.KeyStats.PreviousClose.Value
 	nasdaqInfo.OpenPrice = info.Data.KeyStats.OpenPrice.Value
-	nasdaqInfo.LastSalePrice = info.Data.PrimaryData.LastSalePrice
+	nasdaqInfo.LastSalePrice, _ = domain.FindPercentValue(info.Data.PrimaryData.LastSalePrice)
 	nasdaqInfo.NetChange = info.Data.PrimaryData.NetChange
-	nasdaqInfo.PercentageChange = info.Data.PrimaryData.PercentageChange
 	nasdaqInfo.DeltaIndicator = info.Data.PrimaryData.DeltaIndicator
+
+	if nasdaqInfo.DeltaIndicator == "up" {
+		nasdaqInfo.PercentageChange, _ = domain.FindPercentValue(info.Data.PrimaryData.PercentageChange)
+	}
+	if nasdaqInfo.DeltaIndicator == "down" {
+		nasdaqInfo.PercentageChange, _ = domain.FindPercentValue(info.Data.PrimaryData.PercentageChange)
+		nasdaqInfo.PercentageChange *= -1
+	}
 
 	processor.Storage.SetInfo("nasdaq", nasdaqInfo)
 
@@ -57,13 +64,17 @@ func (processor *Processor) nasdaqParseSummary(payload string) {
 		return
 	}
 
+	high, low, _ := domain.FindHighLowPriceValue(summary.Data.SummaryData.TodayHighLow.Value)
+
 	nasdaqSummary := domain.Summary{}
 
 	nasdaqSummary.Symbol = content.Symbol
 	nasdaqSummary.Sector = summary.Data.SummaryData.Sector.Value
 	nasdaqSummary.Sector = summary.Data.SummaryData.Sector.Value
 	nasdaqSummary.Industry = summary.Data.SummaryData.Industry.Value
-	nasdaqSummary.TodayHighLow = summary.Data.SummaryData.TodayHighLow.Value
+	nasdaqSummary.TodayHigh = high
+	nasdaqSummary.TodayLow = low
+	nasdaqSummary.TodayVolatility = (high - low) / low
 	nasdaqSummary.ShareVolume = summary.Data.SummaryData.ShareVolume.Value
 	nasdaqSummary.AverageVolume = summary.Data.SummaryData.AverageVolume.Value
 	nasdaqSummary.PreviousClose = summary.Data.SummaryData.PreviousClose.Value
@@ -131,52 +142,36 @@ func (processor *Processor) nasdaqParseRealTime(payload string) {
 func (processor *Processor) nasdaqParseHistory(payload string) {
 	var content struct {
 		Symbol  string
-		Content []string
+		Content string
 	}
 
-	// json.Unmarshal([]byte(payload), &content)
+	json.Unmarshal([]byte(payload), &content)
+	history := &domain.NasdaqHistory{}
 
-	// var rtCollection []domain.NasdaqRealTime
+	err := json.Unmarshal([]byte(content.Content), &history)
+	if err != nil {
+		log.Printf("ERROR: fail unmarshal nasdaq history: %s", err.Error)
+		return
+	}
 
-	// for _, item := range content.Content {
-	// 	rt := domain.NasdaqRealTime{}
-	// 	err := json.Unmarshal([]byte(item), &rt)
-	// 	if err != nil {
-	// 		log.Printf("ERROR: fail unmarshal nasdaq info: %s", err.Error)
-	// 		return
-	// 	}
+	nasdaqHistory := domain.History{}
 
-	// 	rtCollection = append(rtCollection, rt)
-	// }
+	nasdaqHistory.Symbol = content.Symbol
+	for _, candle := range history.Data.Chart {
+		chart := domain.Chart{
+			High:     domain.ToFloat(candle.Z.High),
+			Low:      domain.ToFloat(candle.Z.Low),
+			Open:     domain.ToFloat(candle.Z.Open),
+			Close:    domain.ToFloat(candle.Z.Close),
+			Volume:   domain.ToFloat(candle.Z.Volume),
+			DateTime: domain.ToTime(candle.Z.DateTime),
+			Value:    domain.ToFloat(candle.Z.Value),
+		}
 
-	// realTimeColletion := make([]domain.NasdaqRealTime, len(content.Content))
+		nasdaqHistory.Chart = append(nasdaqHistory.Chart, chart)
+	}
 
-	// for _, item := range content.Content {
-	// 	realTime := domain.NasdaqRealTime{}
-
-	// 	err := json.Unmarshal([]byte(item), &realTime)
-	// 	if err != nil {
-	// 		log.Printf("ERROR: fail unmarshal nasdaq info: %s", err.Error)
-	// 		return
-	// 	}
-
-	// 	realTimeColletion = append(realTimeColletion, realTime)
-	// }
-
-	// nasdaqSummary := domain.Summary{}
-
-	// nasdaqSummary.Symbol = content.Symbol
-	// nasdaqSummary.Sector = summary.Data.SummaryData.Sector.Value
-	// nasdaqSummary.Sector = summary.Data.SummaryData.Sector.Value
-	// nasdaqSummary.Industry = summary.Data.SummaryData.Industry.Value
-	// nasdaqSummary.TodayHighLow = summary.Data.SummaryData.TodayHighLow.Value
-	// nasdaqSummary.ShareVolume = summary.Data.SummaryData.ShareVolume.Value
-	// nasdaqSummary.AverageVolume = summary.Data.SummaryData.AverageVolume.Value
-	// nasdaqSummary.PreviousClose = summary.Data.SummaryData.PreviousClose.Value
-	// nasdaqSummary.FiftTwoWeekHighLow = summary.Data.SummaryData.FiftTwoWeekHighLow.Value
-	// nasdaqSummary.EarningsPerShare, _ = domain.FindPercentValue(summary.Data.SummaryData.EarningsPerShare.Value)
-
-	// processor.Storage.SetSummary("nasdaq", nasdaqSummary)
+	processor.Storage.SetHistory("nasdaq", nasdaqHistory)
 
 	log.Printf("INFO: nasdaq history loaded. Symbol: %s", content.Symbol)
 }

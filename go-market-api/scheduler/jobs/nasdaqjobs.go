@@ -20,23 +20,65 @@ type Nasdaq struct {
 
 //RunJob - run nasdaq job
 func (nasdaq Nasdaq) RunJob() {
-	// time.Sleep(5 * time.Second)
+
 	go func() {
 		for {
+			if !nasdaq.Storage.GetSync("nasdaq.loadinfo") {
+				continue
+			}
 
 			for _, symbol := range nasdaq.Storage.GetSymbolsKeys() {
 
 				if nasdaq.Storage.SkipFilter(symbol) {
 					continue
 				}
-
-				time.Sleep(300 * time.Millisecond)
-
-				fmt.Println("INFO: nasdaq ... " + symbol)
-
 				nasdaq.nasdaqLoadInfo(symbol)
+			}
+		}
+	}()
+
+	go func() {
+		for {
+			if !nasdaq.Storage.GetSync("nasdaq.loadsummary") {
+				continue
+			}
+
+			for _, symbol := range nasdaq.Storage.GetSymbolsKeys() {
+
+				if nasdaq.Storage.SkipFilter(symbol) {
+					continue
+				}
 				nasdaq.nasdaqLoadSummary(symbol)
+			}
+		}
+	}()
+
+	go func() {
+		for {
+			if !nasdaq.Storage.GetSync("nasdaq.loadrealtime") {
+				continue
+			}
+
+			for _, symbol := range nasdaq.Storage.GetSymbolsKeys() {
+
+				if nasdaq.Storage.SkipFilter(symbol) {
+					continue
+				}
 				nasdaq.nasdaqLoadRealTime(symbol)
+			}
+		}
+	}()
+
+	go func() {
+		for {
+			if !nasdaq.Storage.GetSync("nasdaq.loadhistory") {
+				continue
+			}
+
+			for _, symbol := range nasdaq.Storage.GetSymbolsKeys() {
+				if nasdaq.Storage.SkipFilter(symbol) {
+					continue
+				}
 				nasdaq.nasdaqLoadHistory(symbol)
 			}
 		}
