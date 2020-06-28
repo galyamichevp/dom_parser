@@ -12,16 +12,153 @@ class Marker extends Component {
 
 
     render() {
-        if (this.props.ratings && Object.keys(this.props.ratings).length > 0) {
-            const { targetPercent, targetPrice } = this.props.ratings['marketbeat']
+        if (this.props.markers && Object.keys(this.props.markers).length > 0) {
+            const { delta, delta3, delta5 } = this.props.markers
+            const { deviation, volatility } = this.props.markers
+            const { eps, range52, targetPercent } = this.props.markers
 
             return (
-                <div>Rating:
-                    <p style={{ fontSize: "8pt" }}>{targetPrice} ({targetPercent}%)</p>
+                <div>
+                    <Grid style={{ margin: "2px" }}>
+                        <Grid.Row columns={3}>
+                            <Grid.Column>
+                                {
+                                    delta && delta.bValue ?
+                                        <Icon
+                                            name="thumbs up outline"
+                                            color="green"
+                                        />
+                                        :
+                                        <Icon
+                                            name="thumbs down outline"
+                                            color="red"
+                                        />
+                                }
+                                <span>Delta({delta && delta.fValue.toFixed(2)})</span>
+                            </Grid.Column>
+                            <Grid.Column>
+                                {
+                                    delta3 && delta3.bValue ?
+                                        <Icon
+                                            name="thumbs up outline"
+                                            color="green"
+                                        />
+                                        :
+                                        <Icon
+                                            name="thumbs down outline"
+                                            color="red"
+                                        />
+                                }
+                                <span>Delta3({delta3 && delta3.fValue.toFixed(2)})</span>
+                            </Grid.Column>
+                            <Grid.Column>
+                                {
+                                    delta5 && delta5.bValue ?
+                                        <Icon
+                                            name="thumbs up outline"
+                                            color="green"
+                                        />
+                                        :
+                                        <Icon
+                                            name="thumbs down outline"
+                                            color="red"
+                                        />
+                                }
+                                <span>Delta5({delta5 && delta5.fValue.toFixed(2)})</span>
+                            </Grid.Column>
+                        </Grid.Row>
+                    </Grid>
+
+
+                    <Grid style={{ margin: "2px" }}>
+                        <Grid.Row columns={3}>
+                            <Grid.Column>
+                                {
+                                    deviation && deviation.bValue ?
+                                        <Icon
+                                            name="thumbs up outline"
+                                            color="green"
+                                        />
+                                        :
+                                        <Icon
+                                            name="thumbs down outline"
+                                            color="red"
+                                        />
+                                }
+                                <span>Deviation({deviation && deviation.fValue.toFixed(2)})</span>
+                            </Grid.Column>
+                            <Grid.Column>
+                                {
+                                    volatility && volatility.bValue ?
+                                        <Icon
+                                            name="thumbs up outline"
+                                            color="green"
+                                        />
+                                        :
+                                        <Icon
+                                            name="thumbs down outline"
+                                            color="red"
+                                        />
+                                }
+                                <span>Volatility({volatility && volatility.fValue.toFixed(2)})</span>
+                            </Grid.Column>
+                            <Grid.Column></Grid.Column>
+                        </Grid.Row>
+                    </Grid>
+
+                    <Grid style={{ margin: "2px" }}>
+                        <Grid.Row columns={3}>
+                            <Grid.Column>
+                                {
+                                    targetPercent && targetPercent.bValue ?
+                                        <Icon
+                                            name="thumbs up outline"
+                                            color="green"
+                                        />
+                                        :
+                                        <Icon
+                                            name="thumbs down outline"
+                                            color="red"
+                                        />
+                                }
+                                <span>Target%({targetPercent && targetPercent.fValue.toFixed(2)})</span>
+                            </Grid.Column>
+                            <Grid.Column>
+                                {
+                                    eps && eps.bValue ?
+                                        <Icon
+                                            name="thumbs up outline"
+                                            color="green"
+                                        />
+                                        :
+                                        <Icon
+                                            name="thumbs down outline"
+                                            color="red"
+                                        />
+                                }
+                                <span>EPS({eps && eps.fValue.toFixed(2)})</span>
+                            </Grid.Column>
+                            <Grid.Column>
+                                {
+                                    range52 && range52.bValue ?
+                                        <Icon
+                                            name="thumbs up outline"
+                                            color="green"
+                                        />
+                                        :
+                                        <Icon
+                                            name="thumbs down outline"
+                                            color="red"
+                                        />
+                                }
+                                <span>Range52({range52 && range52.fValue.toFixed(2)})</span>
+                            </Grid.Column>
+                        </Grid.Row>
+                    </Grid>
                 </div>
             );
         }
-        return (<div>Summary:</div>)
+        return (<div>Markers:</div>)
     }
 }
 

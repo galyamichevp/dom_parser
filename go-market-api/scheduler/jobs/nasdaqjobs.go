@@ -55,9 +55,9 @@ func (nasdaq Nasdaq) RunJob() {
 
 	go func() {
 		for {
-			// if !nasdaq.Storage.GetSync("nasdaq.loadrealtime") {
-			// 	continue
-			// }
+			if !nasdaq.Storage.GetSync("nasdaq.loadrealtime") {
+				continue
+			}
 
 			for _, symbol := range nasdaq.Storage.GetSymbolsKeys() {
 

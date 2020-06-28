@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"go-dom-parser/domain"
 	"log"
+	"sort"
+	"time"
 )
 
 func (processor *Processor) nasdaqParseInfo(payload string) {
@@ -112,7 +114,7 @@ func (processor *Processor) nasdaqParseSummary(payload string) {
 
 	markerVolatility := domain.Marker{
 		Symbol: content.Symbol,
-		FValue: ((high - low) / low),
+		FValue: (((high - low) / low) * 100),
 		BValue: (((high - low) / low) * 100) > 10,
 	}
 
@@ -157,7 +159,33 @@ func (processor *Processor) nasdaqParseRealTime(payload string) {
 		}
 	}
 
+	sort.Sort(SortByDateTrade(trades))
+
 	processor.Storage.SetTrades("nasdaq", content.Symbol, trades)
+
+	// ...
+
+	timeStamp, _ := time.Parse("15:04:05", trades[0].Time.Add(time.Hour*-2).Format("15:04:05"))
+
+	deltaTrades := make([]domain.Trade, 0)
+
+	for _, trade := range trades {
+		if trade.Time.After(timeStamp) {
+			deltaTrades = append(deltaTrades, trade)
+		}
+	}
+
+	outTrade := deltaTrades[0].Price
+	inTrade := deltaTrades[len(deltaTrades)-1].Price
+
+	markerDeviation := domain.Marker{
+		Symbol: content.Symbol,
+		FValue: ((outTrade - inTrade) / inTrade) * 100,
+		BValue: (((outTrade - inTrade) / inTrade) * 100) > -2,
+	}
+
+	processor.Storage.SetMarker("deviation", markerDeviation)
+	// ...
 
 	log.Printf("INFO: nasdaq realtime loaded. Symbol: %s", content.Symbol)
 }
@@ -202,16 +230,16 @@ func (processor *Processor) nasdaqParseHistory(payload string) {
 
 	markerDelta3 := domain.Marker{
 		Symbol: content.Symbol,
-		FValue: ((days1.Close - days3.Close) / days3.Close) * 100,
-		BValue: (((days1.Close - days3.Close) / days3.Close) * 100) < -5,
+		FValue: ((days3.Close - days1.Close) / days1.Close) * -100,
+		BValue: (((days3.Close - days1.Close) / days1.Close) * -100) < -5,
 	}
 
 	processor.Storage.SetMarker("delta3", markerDelta3)
 
 	markerDelta5 := domain.Marker{
 		Symbol: content.Symbol,
-		FValue: ((days1.Close - days5.Close) / days5.Close) * 100,
-		BValue: (((days1.Close - days5.Close) / days5.Close) * 100) < -10,
+		FValue: ((days5.Close - days1.Close) / days1.Close) * -100,
+		BValue: (((days5.Close - days1.Close) / days1.Close) * -100) < -10,
 	}
 
 	processor.Storage.SetMarker("delta5", markerDelta5)
