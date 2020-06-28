@@ -125,21 +125,6 @@ class Marker extends Component {
                             </Grid.Column>
                             <Grid.Column>
                                 {
-                                    eps && eps.bValue ?
-                                        <Icon
-                                            name="thumbs up outline"
-                                            color="green"
-                                        />
-                                        :
-                                        <Icon
-                                            name="thumbs down outline"
-                                            color="red"
-                                        />
-                                }
-                                <span>EPS({eps && eps.fValue.toFixed(2)})</span>
-                            </Grid.Column>
-                            <Grid.Column>
-                                {
                                     range52 && range52.bValue ?
                                         <Icon
                                             name="thumbs up outline"
@@ -152,6 +137,21 @@ class Marker extends Component {
                                         />
                                 }
                                 <span>Range52({range52 && range52.fValue.toFixed(2)})</span>
+                            </Grid.Column>
+                            <Grid.Column>
+                                {
+                                    eps && eps.bValue ?
+                                        <Icon
+                                            name="thumbs up outline"
+                                            color="green"
+                                        />
+                                        :
+                                        <Icon
+                                            name="thumbs down outline"
+                                            color="red"
+                                        />
+                                }
+                                <span>EPS({eps && eps.fValue.toFixed(2)})</span>
                             </Grid.Column>
                         </Grid.Row>
                     </Grid>

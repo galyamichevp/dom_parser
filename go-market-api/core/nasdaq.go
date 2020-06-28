@@ -106,7 +106,7 @@ func (processor *Processor) nasdaqParseSummary(payload string) {
 
 	markerRange52 := domain.Marker{
 		Symbol: content.Symbol,
-		FValue: ((high52 - prevClose) / prevClose),
+		FValue: ((high52 - prevClose) / prevClose) * 100,
 		BValue: ((prevClose - low52) / low52) < ((high52 - prevClose) / prevClose),
 	}
 
@@ -155,7 +155,9 @@ func (processor *Processor) nasdaqParseRealTime(payload string) {
 			trade.Volume = domain.ToFloat(row.NLSShareVolume)
 			trade.Time = domain.ToTime(row.NLSTime)
 
-			trades = append(trades, trade)
+			if trade.Time.Format("15:04:05") != "00:00:00" {
+				trades = append(trades, trade)
+			}
 		}
 	}
 
@@ -165,23 +167,31 @@ func (processor *Processor) nasdaqParseRealTime(payload string) {
 
 	// ...
 
-	timeStamp, _ := time.Parse("15:04:05", trades[0].Time.Add(time.Hour*-2).Format("15:04:05"))
+	timeLimit, _ := time.Parse("15:04:05", trades[0].Time.Add(time.Hour*-2).Format("15:04:05"))
 
-	deltaTrades := make([]domain.Trade, 0)
+	var tradeIndex int
 
-	for _, trade := range trades {
-		if trade.Time.After(timeStamp) {
-			deltaTrades = append(deltaTrades, trade)
+	for index, trade := range trades {
+		if trade.Time.After(timeLimit) {
+			tradeIndex = index
+			continue
 		}
+		break
 	}
 
-	outTrade := deltaTrades[0].Price
-	inTrade := deltaTrades[len(deltaTrades)-1].Price
+	log.Printf("START TRADE")
+	log.Println(trades[0])
+	log.Println(trades[1])
+	log.Println(trades[2])
+	log.Printf("LIMIT TRADE")
+	log.Println(trades[tradeIndex])
+	log.Println(trades[tradeIndex+1])
+	log.Println(trades[tradeIndex+2])
 
 	markerDeviation := domain.Marker{
 		Symbol: content.Symbol,
-		FValue: ((outTrade - inTrade) / inTrade) * 100,
-		BValue: (((outTrade - inTrade) / inTrade) * 100) > -2,
+		FValue: ((trades[tradeIndex].Price - trades[0].Price) / trades[0].Price) * -100,
+		BValue: (((trades[tradeIndex].Price - trades[0].Price) / trades[0].Price) * -100) > -2,
 	}
 
 	processor.Storage.SetMarker("deviation", markerDeviation)

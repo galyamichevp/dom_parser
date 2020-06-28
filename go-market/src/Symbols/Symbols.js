@@ -171,7 +171,7 @@ class Symbols extends Component {
   };
 
   onReload = (e) => {
-    // this.getSymbols();
+    this.getSymbols();
   }
 
   onPageChange = (e, data) => {
