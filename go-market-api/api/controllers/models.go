@@ -14,6 +14,13 @@ type ResourcesGetRequest struct {
 	Verb string `form:"verb"`
 }
 
+// SymbolsGetResponse - ...
+type SymbolsGetResponse struct {
+	Symbols    []domain.Symbol `json:"symbols"`
+	Filters    []string        `json:"filters"`
+	TotalPages int             `json:"totalPages"`
+}
+
 // SymbolsGetRequest - query model allowed to get symbols
 type SymbolsGetRequest struct {
 	SortTargetPercent string  `form:"sortTargetPercent"`

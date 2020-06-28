@@ -65,15 +65,13 @@ func (controller *Controller) GetSymbols(context *gin.Context) {
 		sort.Sort(SortDescByRatingPercent(symbols))
 	}
 
-	response := struct {
-		Symbols    []domain.Symbol `json:"symbols"`
-		Filters    []string        `json:"filters"`
-		TotalPages int             `json:"totalPages"`
-	}{
-		symbols,
-		controller.Storage.GetActiveFilterKeys(),
-		totalPages,
+	response := SymbolsGetResponse{
+		Symbols:    symbols,
+		Filters:    controller.Storage.GetActiveFilterKeys(),
+		TotalPages: totalPages,
 	}
+
+	response.BuildMarkers()
 
 	context.JSON(http.StatusOK, response)
 }

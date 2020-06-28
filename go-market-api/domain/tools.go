@@ -8,9 +8,16 @@ import (
 	"time"
 )
 
+// ToDate - parse string to date
+func ToDate(source string) time.Time {
+	t1, _ := time.Parse("01/02/2006", source)
+
+	return t1
+}
+
 // ToTime - parse string to time
 func ToTime(source string) time.Time {
-	t1, _ := time.Parse("01/02/2006", source)
+	t1, _ := time.Parse("15:04:05", source)
 
 	return t1
 }
@@ -28,6 +35,22 @@ func ToFloat(source string) float64 {
 
 // FindPercentValue - find percent value in string
 func FindPercentValue(source string) (float64, error) {
+	r, _ := regexp.Compile("[0-9,.+-]+")
+
+	res := r.FindString(source)
+
+	res = strings.ReplaceAll(res, ",", "")
+
+	f, err := strconv.ParseFloat(res, 64)
+	if err == nil {
+		return f, nil
+	}
+
+	return -1, err
+}
+
+// FindPriceValue - find price value in string
+func FindPriceValue(source string) (float64, error) {
 	r, _ := regexp.Compile("[0-9,.+-]+")
 
 	res := r.FindString(source)

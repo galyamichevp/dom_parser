@@ -46,10 +46,13 @@ func (s *Storage) GetSymbol(symbol string) Symbol {
 		data.Indicators = make(map[string]Indicator)
 	}
 	if data.Trades == nil {
-		data.Trades = make(map[string]Trade)
+		data.Trades = make(map[string][]Trade)
 	}
 	if data.Histories == nil {
 		data.Histories = make(map[string]History)
+	}
+	if data.Markers == nil {
+		data.Markers = make(map[string]Marker)
 	}
 
 	return data
@@ -71,10 +74,13 @@ func (s *Storage) GetSymbolUnsafe(symbol string) Symbol {
 		data.Indicators = make(map[string]Indicator)
 	}
 	if data.Trades == nil {
-		data.Trades = make(map[string]Trade)
+		data.Trades = make(map[string][]Trade)
 	}
 	if data.Histories == nil {
 		data.Histories = make(map[string]History)
+	}
+	if data.Markers == nil {
+		data.Markers = make(map[string]Marker)
 	}
 
 	return data
@@ -192,6 +198,20 @@ func (s *Storage) SetHistory(key string, history History) {
 	defer s.Locker.Unlock()
 
 	s.Symbols[history.Symbol].Histories[key] = history
+}
+
+func (s *Storage) SetMarker(key string, marker Marker) {
+	s.Locker.Lock()
+	defer s.Locker.Unlock()
+
+	s.Symbols[marker.Symbol].Markers[key] = marker
+}
+
+func (s *Storage) SetTrades(key, symbol string, trades []Trade) {
+	s.Locker.Lock()
+	defer s.Locker.Unlock()
+
+	s.Symbols[symbol].Trades[key] = trades
 }
 
 func (s *Storage) GetSync(key string) bool {

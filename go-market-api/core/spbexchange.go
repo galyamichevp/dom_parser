@@ -36,8 +36,9 @@ func (processor *Processor) spbExchangeParseSymbol(payload string) {
 			Infos:       make(map[string]domain.Info),
 			Summaries:   make(map[string]domain.Summary),
 			Indicators:  make(map[string]domain.Indicator),
-			Trades:      make(map[string]domain.Trade),
+			Trades:      make(map[string][]domain.Trade),
 			Histories:   make(map[string]domain.History),
+			Markers:     make(map[string]domain.Marker),
 		}
 		processor.Storage.SetSymbol(symbol.Symbol, symbol)
 
