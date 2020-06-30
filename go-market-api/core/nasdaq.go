@@ -70,7 +70,7 @@ func (processor *Processor) nasdaqParseSummary(payload string) {
 
 	err := json.Unmarshal([]byte(content.Content), &summary)
 	if err != nil {
-		log.Printf("ERROR: fail unmarshal nasdaq info: %s", err.Error)
+		log.Printf("ERROR: fail unmarshal nasdaq summary: %s", err.Error)
 		return
 	}
 
@@ -93,6 +93,7 @@ func (processor *Processor) nasdaqParseSummary(payload string) {
 	nasdaqSummary.FiftTwoWeekHigh = high52
 	nasdaqSummary.FiftTwoWeekLow = low52
 	nasdaqSummary.EarningsPerShare = eps
+	nasdaqSummary.PERatio = summary.Data.SummaryData.PERatio.Value
 
 	processor.Storage.SetSummary("nasdaq", nasdaqSummary)
 
@@ -119,6 +120,14 @@ func (processor *Processor) nasdaqParseSummary(payload string) {
 	}
 
 	processor.Storage.SetMarker("volatility", markerVolatility)
+
+	markerPERation := domain.Marker{
+		Symbol: content.Symbol,
+		FValue: nasdaqSummary.PERatio,
+		BValue: nasdaqSummary.PERatio < 20,
+	}
+
+	processor.Storage.SetMarker("peRation", markerPERation)
 
 	log.Printf("INFO: nasdaq summary loaded. Symbol: %s", content.Symbol)
 }
@@ -161,6 +170,10 @@ func (processor *Processor) nasdaqParseRealTime(payload string) {
 		}
 	}
 
+	if len(trades) <= 0 {
+		return
+	}
+
 	sort.Sort(SortByDateTrade(trades))
 
 	processor.Storage.SetTrades("nasdaq", content.Symbol, trades)
@@ -178,15 +191,6 @@ func (processor *Processor) nasdaqParseRealTime(payload string) {
 		}
 		break
 	}
-
-	log.Printf("START TRADE")
-	log.Println(trades[0])
-	log.Println(trades[1])
-	log.Println(trades[2])
-	log.Printf("LIMIT TRADE")
-	log.Println(trades[tradeIndex])
-	log.Println(trades[tradeIndex+1])
-	log.Println(trades[tradeIndex+2])
 
 	markerDeviation := domain.Marker{
 		Symbol: content.Symbol,
@@ -233,6 +237,10 @@ func (processor *Processor) nasdaqParseHistory(payload string) {
 	}
 
 	processor.Storage.SetHistory("nasdaq", nasdaqHistory)
+
+	if len(nasdaqHistory.Chart) != 5 {
+		return
+	}
 
 	days1 := nasdaqHistory.Chart[4:5][0]
 	days3 := nasdaqHistory.Chart[2:3][0]

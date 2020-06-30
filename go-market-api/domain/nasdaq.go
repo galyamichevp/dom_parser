@@ -62,24 +62,24 @@ type NasdaqSummaryData struct {
 }
 
 type SummaryData struct {
-	Exchange           AnnualizedDividend `json:"Exchange"`
-	Sector             AnnualizedDividend `json:"Sector"`
-	Industry           AnnualizedDividend `json:"Industry"`
-	OneYrTarget        AnnualizedDividend `json:"OneYrTarget"`
-	TodayHighLow       AnnualizedDividend `json:"TodayHighLow"`
-	ShareVolume        AnnualizedDividend `json:"ShareVolume"`
-	AverageVolume      AnnualizedDividend `json:"AverageVolume"`
-	PreviousClose      AnnualizedDividend `json:"PreviousClose"`
-	FiftTwoWeekHighLow AnnualizedDividend `json:"FiftTwoWeekHighLow"`
-	MarketCap          AnnualizedDividend `json:"MarketCap"`
-	// PERatio             BetaX              `json:"PERatio"`
+	Exchange            AnnualizedDividend `json:"Exchange"`
+	Sector              AnnualizedDividend `json:"Sector"`
+	Industry            AnnualizedDividend `json:"Industry"`
+	OneYrTarget         AnnualizedDividend `json:"OneYrTarget"`
+	TodayHighLow        AnnualizedDividend `json:"TodayHighLow"`
+	ShareVolume         AnnualizedDividend `json:"ShareVolume"`
+	AverageVolume       AnnualizedDividend `json:"AverageVolume"`
+	PreviousClose       AnnualizedDividend `json:"PreviousClose"`
+	FiftTwoWeekHighLow  AnnualizedDividend `json:"FiftTwoWeekHighLow"`
+	MarketCap           AnnualizedDividend `json:"MarketCap"`
+	PERatio             Beta               `json:"PERatio"`
 	ForwardPE1Yr        AnnualizedDividend `json:"ForwardPE1Yr"`
 	EarningsPerShare    AnnualizedDividend `json:"EarningsPerShare"`
 	AnnualizedDividend  AnnualizedDividend `json:"AnnualizedDividend"`
 	ExDividendDate      AnnualizedDividend `json:"ExDividendDate"`
 	DividendPaymentDate AnnualizedDividend `json:"DividendPaymentDate"`
 	Yield               AnnualizedDividend `json:"Yield"`
-	// Beta                BetaX              `json:"Beta"`
+	Beta                Beta               `json:"Beta"`
 }
 
 type AnnualizedDividend struct {
@@ -87,10 +87,54 @@ type AnnualizedDividend struct {
 	Value string `json:"value"`
 }
 
-type BetaX struct {
-	Label string `json:"label"`
-	Value int64  `json:"value"`
+type Beta struct {
+	Label string  `json:"label"`
+	Value float64 `json:"value"`
 }
+
+// type NasdaqSummary struct {
+// 	Data    NasdaqSummaryData `json:"data"`
+// 	Message interface{}       `json:"message"`
+// 	Status  Status            `json:"status"`
+// }
+
+// type NasdaqSummaryData struct {
+// 	Symbol         string      `json:"symbol"`
+// 	SummaryData    SummaryData `json:"summaryData"`
+// 	AssetClass     string      `json:"assetClass"`
+// 	AdditionalData interface{} `json:"additionalData"`
+// }
+
+// type SummaryData struct {
+// 	Exchange            AnnualizedDividend `json:"Exchange"`
+// 	Sector              AnnualizedDividend `json:"Sector"`
+// 	Industry            AnnualizedDividend `json:"Industry"`
+// 	OneYrTarget         AnnualizedDividend `json:"OneYrTarget"`
+// 	TodayHighLow        AnnualizedDividend `json:"TodayHighLow"`
+// 	ShareVolume         AnnualizedDividend `json:"ShareVolume"`
+// 	AverageVolume       AnnualizedDividend `json:"AverageVolume"`
+// 	PreviousClose       AnnualizedDividend `json:"PreviousClose"`
+// 	FiftTwoWeekHighLow  AnnualizedDividend `json:"FiftTwoWeekHighLow"`
+// 	MarketCap           AnnualizedDividend `json:"MarketCap"`
+// 	PERatio             BetaX              `json:"PERatio"`
+// 	ForwardPE1Yr        AnnualizedDividend `json:"ForwardPE1Yr"`
+// 	EarningsPerShare    AnnualizedDividend `json:"EarningsPerShare"`
+// 	AnnualizedDividend  AnnualizedDividend `json:"AnnualizedDividend"`
+// 	ExDividendDate      AnnualizedDividend `json:"ExDividendDate"`
+// 	DividendPaymentDate AnnualizedDividend `json:"DividendPaymentDate"`
+// 	Yield               AnnualizedDividend `json:"Yield"`
+// 	// Beta                BetaX              `json:"Beta"`
+// }
+
+// type AnnualizedDividend struct {
+// 	Label string `json:"label"`
+// 	Value string `json:"value"`
+// }
+
+// type BetaX struct {
+// 	Label string `json:"label"`
+// 	Value int64  `json:"value"`
+// }
 
 type NasdaqRealTime struct {
 	Data    RealTimeData `json:"data"`

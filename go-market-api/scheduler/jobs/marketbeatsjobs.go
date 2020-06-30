@@ -23,13 +23,17 @@ func (marketBeat MarketBeat) RunJob() {
 				continue
 			}
 
+			marketBeat.Storage.SetSync("marketbeat.loadratings", false)
+
 			for _, symbol := range marketBeat.Storage.GetSymbolsKeys() {
 
 				if marketBeat.Storage.SkipFilter(symbol) {
 					continue
 				}
 
-				marketBeat.marketBeatLoadAnalytics(symbol)
+				go func(symbol string) {
+					marketBeat.marketBeatLoadAnalytics(symbol)
+				}(symbol)
 			}
 		}
 	}()
@@ -72,12 +76,12 @@ func marketbeatRequestResource(symbol string, market string) string {
 	req.Header.Add("Cookie", "__cfduid=dc5e7c74b8f21b5e474a454d5481dd8281591791238; ASP.NET_SessionId=")
 
 	resp, err := client.Do(req)
-	defer resp.Body.Close()
-	body, err := ioutil.ReadAll(resp.Body)
-
-	if resp.StatusCode == http.StatusOK {
-		return string(body)
+	if err != nil || resp.StatusCode != http.StatusOK {
+		return ""
 	}
+	defer resp.Body.Close()
 
-	return ""
+	body, _ := ioutil.ReadAll(resp.Body)
+
+	return string(body)
 }

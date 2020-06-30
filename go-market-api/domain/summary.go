@@ -15,4 +15,5 @@ type Summary struct {
 	FiftTwoWeekHigh  float64 `json:"fiftTwoWeekHigh"`
 	FiftTwoWeekLow   float64 `json:"fiftTwoWeekLow"`
 	EarningsPerShare float64 `json:"earningsPerShare"`
+	PERatio          float64 `json:"peRatio"`
 }

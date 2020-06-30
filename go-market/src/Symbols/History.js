@@ -19,7 +19,7 @@ class History extends Component {
             return (
                 <div>History:
                     {
-                        chart.map(h => {
+                        chart && chart.map(h => {
                             return (
                                 <p key={h.dateTime} style={{ fontSize: "8pt" }}>{new Date(h.dateTime).toLocaleDateString()}: O:{h.open}/H:{h.high}/L:{h.low}/C:{h.close}/V:{h.volume}</p>)
                         })

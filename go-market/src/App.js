@@ -11,19 +11,29 @@ class App extends Component {
 
     this.state = {
       filter: {
-        targetPercent: 50
+        targetPercent: [50, 100],
+        sync: false,
       }
     };
   }
 
   onTargetPercentChange = (value) => {
-    console.log(" ==> " + value)
     this.setState(state => ({
       filter: {
-        targetPercent: value
+        ...this.state.filter,
+        targetPercent: value,
       }
     }))
   };
+
+  onSyncChange = (value) => {
+    this.setState(state => ({
+      filter: {
+        ...this.state.filter,
+        sync: value,
+      }
+    }))
+  }
 
   render() {
     return (
@@ -35,7 +45,7 @@ class App extends Component {
           <Divider horizontal>Symmary</Divider>
           <Summary />
           <Divider horizontal>Filters</Divider>
-          <Filters filter={this.state.filter} onTargetPercentChange={this.onTargetPercentChange} />
+          <Filters filter={this.state.filter} onTargetPercentChange={this.onTargetPercentChange} onSyncChange={this.onSyncChange} />
           <Divider horizontal>Symbols</Divider>
           <Symbols filter={this.state.filter} />
         </Container>

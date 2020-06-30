@@ -27,6 +27,8 @@ func (nasdaq Nasdaq) RunJob() {
 				continue
 			}
 
+			nasdaq.Storage.SetSync("nasdaq.loadinfo", false)
+
 			for _, symbol := range nasdaq.Storage.GetSymbolsKeys() {
 
 				if nasdaq.Storage.SkipFilter(symbol) {
@@ -42,6 +44,8 @@ func (nasdaq Nasdaq) RunJob() {
 			if !nasdaq.Storage.GetSync("nasdaq.loadsummary") {
 				continue
 			}
+
+			nasdaq.Storage.SetSync("nasdaq.loadsummary", false)
 
 			for _, symbol := range nasdaq.Storage.GetSymbolsKeys() {
 
@@ -59,6 +63,8 @@ func (nasdaq Nasdaq) RunJob() {
 				continue
 			}
 
+			nasdaq.Storage.SetSync("nasdaq.loadrealtime", false)
+
 			for _, symbol := range nasdaq.Storage.GetSymbolsKeys() {
 
 				if nasdaq.Storage.SkipFilter(symbol) {
@@ -74,6 +80,8 @@ func (nasdaq Nasdaq) RunJob() {
 			if !nasdaq.Storage.GetSync("nasdaq.loadhistory") {
 				continue
 			}
+
+			nasdaq.Storage.SetSync("nasdaq.loadhistory", false)
 
 			for _, symbol := range nasdaq.Storage.GetSymbolsKeys() {
 				if nasdaq.Storage.SkipFilter(symbol) {
@@ -182,26 +190,24 @@ func nasdaqRequestSummary(symbol string) string {
 	req.Header.Add("pragma", "no-cache")
 	req.Header.Add("cache-control", "no-cache")
 	req.Header.Add("accept", "application/json, text/plain, */*")
-	req.Header.Add("user-agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.106 Safari/537.36")
+	req.Header.Add("user-agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.116 Safari/537.36")
 	req.Header.Add("origin", "https://www.nasdaq.com")
 	req.Header.Add("sec-fetch-site", "same-site")
 	req.Header.Add("sec-fetch-mode", "cors")
 	req.Header.Add("sec-fetch-dest", "empty")
-	req.Header.Add("referer", "https://www.nasdaq.com/market-activity/stocks/anab")
+	req.Header.Add("referer", "https://www.nasdaq.com/market-activity/stocks/play")
 	req.Header.Add("accept-language", "ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7")
 	req.Header.Add("Cookie", "NSC_W.OEBR.DPN.7070=ffffffffc3a0f70e45525d5f4f58455e445a4a422dae")
 
 	res, err := client.Do(req)
-	defer res.Body.Close()
-	body, err := ioutil.ReadAll(res.Body)
-
-	if res.StatusCode == http.StatusOK {
-		//fmt.Println(string(body))
-
-		return string(body)
+	if err != nil || res.StatusCode != http.StatusOK {
+		return ""
 	}
+	defer res.Body.Close()
 
-	return ""
+	body, _ := ioutil.ReadAll(res.Body)
+
+	return string(body)
 }
 
 // nasdaqLoadRealTime - load Nasdaq RealTime data

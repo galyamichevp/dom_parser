@@ -23,10 +23,10 @@ type SymbolsGetResponse struct {
 
 // SymbolsGetRequest - query model allowed to get symbols
 type SymbolsGetRequest struct {
-	SortTargetPercent string  `form:"sortTargetPercent"`
-	TargetPercent     float64 `form:"targetPercent"`
-	Page              int     `form:"page"`
-	PageSize          int     `form:"pageSize"`
+	SortTargetPercent string    `form:"sortTargetPercent"`
+	TargetPercents    []float64 `form:"targetPercents[]" binding:"required"`
+	Page              int       `form:"page"`
+	PageSize          int       `form:"pageSize"`
 }
 
 // FilterPostRequest - query model allowed to post filter

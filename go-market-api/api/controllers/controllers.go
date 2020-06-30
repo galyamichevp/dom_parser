@@ -19,6 +19,7 @@ func SetupController(storage *domain.Storage) *Controller {
 // GetSymbols - get all loaded symbols
 func (controller *Controller) GetSymbols(context *gin.Context) {
 	requestQuery := SymbolsGetRequest{}
+	//requestQuery.TargetPercent = make([]float64, 2)
 
 	if context.ShouldBind(&requestQuery) == nil {
 		// log.Println(postReq.Type)
@@ -33,11 +34,9 @@ func (controller *Controller) GetSymbols(context *gin.Context) {
 
 		s := controller.Storage.GetSymbol(symbol)
 
-		if s.Ratings["marketbeat"].TragetPercent < requestQuery.TargetPercent {
-			continue
+		if s.Ratings["marketbeat"].TragetPercent >= requestQuery.TargetPercents[0] && s.Ratings["marketbeat"].TragetPercent <= requestQuery.TargetPercents[1] {
+			symbols = append(symbols, s)
 		}
-
-		symbols = append(symbols, s)
 	}
 
 	sort.Sort(SortAscBySymbolId(symbols))
