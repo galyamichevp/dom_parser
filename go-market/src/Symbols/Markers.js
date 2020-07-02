@@ -13,14 +13,14 @@ class Marker extends Component {
 
     render() {
         if (this.props.markers && Object.keys(this.props.markers).length > 0) {
-            const { delta, delta3, delta5 } = this.props.markers
+            const { delta, delta2, delta3, delta4, delta5 } = this.props.markers
             const { deviation, volatility } = this.props.markers
             const { eps, range52, targetPercent, peRation } = this.props.markers
 
             return (
                 <div>
                     <Grid style={{ margin: "2px" }}>
-                        <Grid.Row columns={4}>
+                        <Grid.Row columns={6}>
                             <Grid.Column>
                                 {
                                     delta && delta.bValue ?
@@ -38,6 +38,21 @@ class Marker extends Component {
                             </Grid.Column>
                             <Grid.Column>
                                 {
+                                    delta2 && delta2.bValue ?
+                                        <Icon
+                                            name="thumbs up outline"
+                                            color="green"
+                                        />
+                                        :
+                                        <Icon
+                                            name="thumbs down outline"
+                                            color="red"
+                                        />
+                                }
+                                <span>Delta2({delta2 && delta2.fValue.toFixed(2)})</span>
+                            </Grid.Column>
+                            <Grid.Column>
+                                {
                                     delta3 && delta3.bValue ?
                                         <Icon
                                             name="thumbs up outline"
@@ -50,6 +65,21 @@ class Marker extends Component {
                                         />
                                 }
                                 <span>Delta3({delta3 && delta3.fValue.toFixed(2)})</span>
+                            </Grid.Column>
+                            <Grid.Column>
+                                {
+                                    delta4 && delta4.bValue ?
+                                        <Icon
+                                            name="thumbs up outline"
+                                            color="green"
+                                        />
+                                        :
+                                        <Icon
+                                            name="thumbs down outline"
+                                            color="red"
+                                        />
+                                }
+                                <span>Delta4({delta4 && delta4.fValue.toFixed(2)})</span>
                             </Grid.Column>
                             <Grid.Column>
                                 {
@@ -72,7 +102,7 @@ class Marker extends Component {
 
 
                     <Grid style={{ margin: "2px" }}>
-                        <Grid.Row columns={4}>
+                        <Grid.Row columns={6}>
                             <Grid.Column>
                                 {
                                     deviation && deviation.bValue ?
@@ -105,11 +135,13 @@ class Marker extends Component {
                             </Grid.Column>
                             <Grid.Column></Grid.Column>
                             <Grid.Column></Grid.Column>
+                            <Grid.Column></Grid.Column>
+                            <Grid.Column></Grid.Column>
                         </Grid.Row>
                     </Grid>
 
                     <Grid style={{ margin: "2px" }}>
-                        <Grid.Row columns={4}>
+                        <Grid.Row columns={6}>
                             <Grid.Column>
                                 {
                                     targetPercent && targetPercent.bValue ?
@@ -170,6 +202,8 @@ class Marker extends Component {
                                 }
                                 <span>P/E Ration({peRation && peRation.fValue.toFixed(2)})</span>
                             </Grid.Column>
+                            <Grid.Column></Grid.Column>
+                            <Grid.Column></Grid.Column>
                         </Grid.Row>
                     </Grid>
                 </div>

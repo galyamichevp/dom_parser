@@ -25,6 +25,7 @@ type SymbolsGetResponse struct {
 type SymbolsGetRequest struct {
 	SortTargetPercent string    `form:"sortTargetPercent"`
 	TargetPercents    []float64 `form:"targetPercents[]" binding:"required"`
+	DeltaPercents     []float64 `form:"deltaPercents[]" binding:"required"`
 	Page              int       `form:"page"`
 	PageSize          int       `form:"pageSize"`
 }

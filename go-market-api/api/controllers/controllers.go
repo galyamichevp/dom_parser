@@ -34,7 +34,14 @@ func (controller *Controller) GetSymbols(context *gin.Context) {
 
 		s := controller.Storage.GetSymbol(symbol)
 
-		if s.Ratings["marketbeat"].TragetPercent >= requestQuery.TargetPercents[0] && s.Ratings["marketbeat"].TragetPercent <= requestQuery.TargetPercents[1] {
+		m1 := s.Ratings["marketbeat"].TragetPercent >= requestQuery.TargetPercents[0] && s.Ratings["marketbeat"].TragetPercent <= requestQuery.TargetPercents[1]
+		m2 := s.Markers["delta"].FValue >= requestQuery.DeltaPercents[0] && s.Markers["delta"].FValue <= requestQuery.DeltaPercents[1]
+		m3 := s.Markers["delta2"].FValue >= requestQuery.DeltaPercents[0] && s.Markers["delta2"].FValue <= requestQuery.DeltaPercents[1]
+		m4 := s.Markers["delta3"].FValue >= requestQuery.DeltaPercents[0] && s.Markers["delta3"].FValue <= requestQuery.DeltaPercents[1]
+		m5 := s.Markers["delta4"].FValue >= requestQuery.DeltaPercents[0] && s.Markers["delta4"].FValue <= requestQuery.DeltaPercents[1]
+		m6 := s.Markers["delta5"].FValue >= requestQuery.DeltaPercents[0] && s.Markers["delta5"].FValue <= requestQuery.DeltaPercents[1]
+
+		if m1 && (m2 || m3 || m4 || m5 || m6) {
 			symbols = append(symbols, s)
 		}
 	}
@@ -53,7 +60,6 @@ func (controller *Controller) GetSymbols(context *gin.Context) {
 		to = len(symbols)
 	}
 	symbols = symbols[from:to]
-
 	// ...
 
 	if requestQuery.SortTargetPercent == "asc" {

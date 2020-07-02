@@ -116,7 +116,7 @@ func (processor *Processor) nasdaqParseSummary(payload string) {
 	markerVolatility := domain.Marker{
 		Symbol: content.Symbol,
 		FValue: (((high - low) / low) * 100),
-		BValue: (((high - low) / low) * 100) > 10,
+		BValue: (((high - low) / low) * 100) > 8,
 	}
 
 	processor.Storage.SetMarker("volatility", markerVolatility)
@@ -243,21 +243,39 @@ func (processor *Processor) nasdaqParseHistory(payload string) {
 	}
 
 	days1 := nasdaqHistory.Chart[4:5][0]
+	days2 := nasdaqHistory.Chart[3:4][0]
 	days3 := nasdaqHistory.Chart[2:3][0]
+	days4 := nasdaqHistory.Chart[1:2][0]
 	days5 := nasdaqHistory.Chart[:1][0]
+
+	markerDelta2 := domain.Marker{
+		Symbol: content.Symbol,
+		FValue: ((days2.Close - days1.Close) / days1.Close) * -100,
+		BValue: (((days2.Close - days1.Close) / days1.Close) * -100) < -5,
+	}
+
+	processor.Storage.SetMarker("delta2", markerDelta2)
 
 	markerDelta3 := domain.Marker{
 		Symbol: content.Symbol,
-		FValue: ((days3.Close - days1.Close) / days1.Close) * -100,
-		BValue: (((days3.Close - days1.Close) / days1.Close) * -100) < -5,
+		FValue: ((days3.Close - days2.Close) / days2.Close) * -100,
+		BValue: (((days3.Close - days2.Close) / days2.Close) * -100) < -5,
 	}
 
 	processor.Storage.SetMarker("delta3", markerDelta3)
 
+	markerDelta4 := domain.Marker{
+		Symbol: content.Symbol,
+		FValue: ((days4.Close - days3.Close) / days3.Close) * -100,
+		BValue: (((days4.Close - days3.Close) / days3.Close) * -100) < -5,
+	}
+
+	processor.Storage.SetMarker("delta4", markerDelta4)
+
 	markerDelta5 := domain.Marker{
 		Symbol: content.Symbol,
-		FValue: ((days5.Close - days1.Close) / days1.Close) * -100,
-		BValue: (((days5.Close - days1.Close) / days1.Close) * -100) < -10,
+		FValue: ((days5.Close - days4.Close) / days4.Close) * -100,
+		BValue: (((days5.Close - days4.Close) / days4.Close) * -100) < -10,
 	}
 
 	processor.Storage.SetMarker("delta5", markerDelta5)

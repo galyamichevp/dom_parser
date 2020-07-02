@@ -34,6 +34,10 @@ class Symbols extends Component {
       this.getSymbols(this.state.activePage);
     }
 
+    if (this.props.filter.deltaPercent && this.props.filter.deltaPercent[0] !== prevProps.filter.deltaPercent[0] || this.props.filter.deltaPercent[1] !== prevProps.filter.deltaPercent[1]) {
+      this.getSymbols(this.state.activePage);
+    }
+
     if (this.props.filter.sync !== prevProps.filter.sync) {
       this.getSymbols(this.state.activePage, this.props.filter.sync);
     }
@@ -71,6 +75,8 @@ class Symbols extends Component {
     query += "sortTargetPercent=desc"
     query += "&"
     query += "targetPercents[]=" + this.props.filter.targetPercent[0] + "&" + "targetPercents[]=" + this.props.filter.targetPercent[1]
+    query += "&"
+    query += "deltaPercents[]=" + this.props.filter.deltaPercent[0] + "&" + "deltaPercents[]=" + this.props.filter.deltaPercent[1]
     query += "&"
     query += "page=" + page
     query += "&"
